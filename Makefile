@@ -5,6 +5,7 @@ TARGET = PocketSNES
 
 CC  := $(CROSS_COMPILE)gcc
 CXX := $(CROSS_COMPILE)g++
+STRIP := $(CROSS_COMPILE)strip
 SDL_CONFIG ?= sdl-config
 
 INCLUDE = -I pocketsnes \
@@ -34,9 +35,20 @@ OBJS    = $(OBJ_CPP) $(OBJ_C)
 .PHONY : all
 all : $(TARGET)
 
+.PHONY: opk
+opk: $(TARGET).opk
+
 $(TARGET) : $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
+
+$(TARGET).opk: $(TARGET)
+	rm -rf .opk_data
+	cp -r data .opk_data
+	cp $< .opk_data/pocketsnes.gcw0
+	$(STRIP) .opk_data/pocketsnes.gcw0
+	mksquashfs .opk_data $@ -all-root -noappend -no-exports -no-xattrs
 
 .PHONY : clean
 clean :
 	rm -f $(OBJS) $(TARGET)
+	rm -rf .opk_data $(TARGET).opk

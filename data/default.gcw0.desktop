@@ -1,0 +1,12 @@
+[Desktop Entry]
+
+Name=PocketSNES
+Comment=Super Nintendo emulator
+Comment[fr]=Émulateur de Super Nintendo
+Comment[es]=Emulador de Super Nintendo
+Exec=pocketsnes.gcw0
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=pocketsnes
+Categories=emulators;
