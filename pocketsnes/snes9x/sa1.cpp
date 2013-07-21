@@ -151,7 +151,7 @@ uint8 FASTCALL S9xSA1GetByte (uint32 address, struct SCPUState * cpu)
     if (GetAddress >= (uint8 *) CMemory::MAP_LAST)
 	return (*(GetAddress + (address & 0xffff)));
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 	return (S9xGetSA1 (address & 0xffff));
@@ -198,7 +198,7 @@ void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
 	return;
     }
 
-    switch ((int) Setaddress)
+    switch ((uintptr_t) Setaddress)
     {
     case CMemory::MAP_PPU:
 	S9xSetSA1 (byte, address & 0xffff);
@@ -260,7 +260,7 @@ void FASTCALL S9xSA1SetPCBase (uint32 address, struct SCPUState * cpu)
 	return;
     }
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 	cpu->PCBase = Memory.FillRAM - 0x2000;

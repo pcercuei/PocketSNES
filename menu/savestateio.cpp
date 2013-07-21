@@ -180,7 +180,7 @@ static int save_archive(char *filename, char *buffer, int size)
 }
 
 static
-int state_unc_open(const char *fname, const char *mode)
+long state_unc_open(const char *fname, const char *mode)
 {
 	//mode = "wb"  or "rb"
 	//If mode is write then create a new buffer to hold written data
@@ -203,7 +203,7 @@ int state_unc_open(const char *fname, const char *mode)
 		{
 			mFileZipMode = 0; //normal file mode
 			mFile = fopen(fname, mode);
-			return (int) mFile;
+			return (long) mFile;
 		}
 	}
 	else
@@ -367,7 +367,7 @@ void SetSaveStateIoModeFile()
 	mIOMode=SAVE_STATE_IO_MODE_FILE;
 }
 
-int  statef_open(const char *fname, const char *mode)
+long  statef_open(const char *fname, const char *mode)
 {
 	if(mIOMode==SAVE_STATE_IO_MODE_MEMORY) return state_mem_open(fname,mode);
 	else	return state_unc_open(fname,mode);

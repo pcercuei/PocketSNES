@@ -41,6 +41,8 @@
 #ifndef _GETSET_H_
 #define _GETSET_H_
 
+#include <stdint.h>
+
 #include "ppu.h"
 #include "dsp1.h"
 #include "cpuexec.h"
@@ -66,7 +68,7 @@ INLINE uint8 FASTCALL S9xGetByte (uint32 Address, struct SCPUState * cpu)
 	return (*(GetAddress + (Address & 0xffff)));
     }
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 #ifdef VAR_CYCLES
@@ -153,7 +155,7 @@ INLINE uint16 S9xGetWord (uint32 Address, struct SCPUState * cpu)
 #endif	
     }
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 #ifdef VAR_CYCLES
@@ -253,7 +255,7 @@ INLINE void S9xSetByte (uint8 Byte, uint32 Address, struct SCPUState * cpu)
 	return;
     }
 
-    switch ((int) SetAddress)
+    switch ((uintptr_t) SetAddress)
     {
     case CMemory::MAP_PPU:
 #ifdef VAR_CYCLES
@@ -379,7 +381,7 @@ INLINE void FASTCALL S9xSetWord (uint16 Word, uint32 Address, struct SCPUState *
 	return;
     }
 
-    switch ((int) SetAddress)
+    switch ((uintptr_t) SetAddress)
     {
     case CMemory::MAP_PPU:
 #ifdef VAR_CYCLES
@@ -480,7 +482,7 @@ INLINE uint8 *GetBasePointer (uint32 Address)
     if (GetAddress >= (uint8 *) CMemory::MAP_LAST)
 	return (GetAddress);
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 	return (Memory.FillRAM - 0x2000);
@@ -517,7 +519,7 @@ INLINE uint8 *S9xGetMemPointer (uint32 Address)
     if (GetAddress >= (uint8 *) CMemory::MAP_LAST)
 	return (GetAddress + (Address & 0xffff));
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 	return (Memory.FillRAM - 0x2000 + (Address & 0xffff));
@@ -567,7 +569,7 @@ INLINE void FASTCALL S9xSetPCBase (uint32 Address, struct SCPUState * cpu)
 	return;
     }
 
-    switch ((int) GetAddress)
+    switch ((uintptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 #ifdef VAR_CYCLES
