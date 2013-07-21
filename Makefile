@@ -8,6 +8,14 @@ CXX := $(CROSS_COMPILE)g++
 STRIP := $(CROSS_COMPILE)strip
 SDL_CONFIG ?= sdl-config
 
+ifdef V
+	CMD:=
+	SUM:=@\#
+else
+	CMD:=@
+	SUM:=@echo
+endif
+
 INCLUDE = -I pocketsnes \
 		-I sal/linux -I sal/linux/include \
 		-I sal/common -I sal/common/includes \
@@ -39,16 +47,27 @@ all : $(TARGET)
 opk: $(TARGET).opk
 
 $(TARGET) : $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
+	$(SUM) "  LD      $@"
+	$(CMD)$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
 
 $(TARGET).opk: $(TARGET)
-	rm -rf .opk_data
-	cp -r data .opk_data
-	cp $< .opk_data/pocketsnes.gcw0
-	$(STRIP) .opk_data/pocketsnes.gcw0
-	mksquashfs .opk_data $@ -all-root -noappend -no-exports -no-xattrs
+	$(SUM) "  OPK     $@"
+	$(CMD)rm -rf .opk_data
+	$(CMD)cp -r data .opk_data
+	$(CMD)cp $< .opk_data/pocketsnes.gcw0
+	$(CMD)$(STRIP) .opk_data/pocketsnes.gcw0
+	$(CMD)mksquashfs .opk_data $@ -all-root -noappend -no-exports -no-xattrs -no-progress >/dev/null
+
+%.o: %.c
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.cpp
+	$(SUM) "  CXX     $@"
+	$(CMD)$(CXX) $(CFLAGS) -c $< -o $@
 
 .PHONY : clean
 clean :
-	rm -f $(OBJS) $(TARGET)
-	rm -rf .opk_data $(TARGET).opk
+	$(SUM) "  CLEAN   ."
+	$(CMD)rm -f $(OBJS) $(TARGET)
+	$(CMD)rm -rf .opk_data $(TARGET).opk
