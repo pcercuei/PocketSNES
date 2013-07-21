@@ -2,6 +2,8 @@
 #include <string.h>
 #include <error.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "sal.h"
 
 s32 sal_DirectoryGetCurrent(s8 *path, u32 size)
@@ -10,20 +12,20 @@ s32 sal_DirectoryGetCurrent(s8 *path, u32 size)
 	return SAL_OK;
 }
 
-s32 sal_DirectoryCreate(s8 *path)
+s32 sal_DirectoryCreate(const char *path)
 {
 	s32 count=0;
 	mkdir(path, 0x777);
 	return SAL_OK;
 }
 
-s32 sal_DirectoryGetItemCount(s8 *path, s32 *returnItemCount)
+s32 sal_DirectoryGetItemCount(const char *path, s32 *returnItemCount)
 {
 	u32 count=0;
-	struct DIR *d;
+	DIR *d;
 	struct dirent *de;
 
-	d = opendir((const char*)path);
+	d = opendir(path);
 
 	if (d)
 	{
@@ -38,9 +40,9 @@ s32 sal_DirectoryGetItemCount(s8 *path, s32 *returnItemCount)
 	return SAL_OK;
 }
 
-s32 sal_DirectoryOpen(s8 *path, struct SAL_DIR *d)
+s32 sal_DirectoryOpen(const char *path, struct SAL_DIR *d)
 {
-	d->dir=opendir((const char*)path);
+	d->dir=opendir(path);
 
 	if(d->dir) return SAL_OK;
 	else return SAL_ERROR;
@@ -102,7 +104,8 @@ s32 sal_DirectoryRead(struct SAL_DIR *d, struct SAL_DIRECTORY_ENTRY *dir)
 	}
 }
 
-s32 sal_DirectoryGet(s8 *path, struct SAL_DIRECTORY_ENTRY *dir, s32 startIndex, s32 count)
+s32 sal_DirectoryGet(const char *path, struct SAL_DIRECTORY_ENTRY *dir,
+			s32 startIndex, s32 count)
 {
 	s32 fileCount=0;
 	DIR *d;
@@ -112,7 +115,7 @@ s32 sal_DirectoryGet(s8 *path, struct SAL_DIRECTORY_ENTRY *dir, s32 startIndex, 
 	s32 endIndex=startIndex+count;
 	long loc;
 
-	d = opendir((const char*)path);
+	d = opendir(path);
 
 	if (d)
 	{

@@ -20,14 +20,14 @@ struct SAL_DIRECTORY_ENTRY
 s32 sal_Init(void);
 s8 *sal_LastErrorGet();
 void sal_LastErrorSet(char *msg);
-s32 sal_StringCompare(s8 *string1, s8 *string2);
+s32 sal_StringCompare(const char *string1, const char *string2);
 
 u32 sal_VideoInit(u32 bpp, u32 color, u32 refreshRate);
 u32 sal_VideoGetBpp();
 void sal_VideoClear(u32 color);
 void sal_VideoClearAll(u32 color);
 void sal_VideoDrawRect(s32 x, s32 y, s32 width, s32 height, u32 color);
-void sal_VideoPrint(s32 x,s32 y,s8 *buffer,u32 color);
+void sal_VideoPrint(s32 x, s32 y, const char *buffer, u32 color);
 void sal_VideoFlip(s32 vsync);
 void *sal_VideoGetBuffer();
 u32 sal_VideoSetScaling(s32 width, s32 height);
@@ -69,28 +69,29 @@ u32 sal_InputPollRepeat();
 
 void sal_Sleep(u32 milliSecs);
 
-s32 sal_ZipLoad(s8 *filename, s8 *buffer, s32 bufferMaxSize, s32 *file_size);
-s32 sal_ZipSave(s8 *filename, s8 *firstFilename, s8 *buffer, s32 size);
-s32 sal_ZipGetFirstCrc(s8 *filename, s32 *crc);
-void sal_ZipGetFirstFilename(s8 *filename, s8 *longfilename);
-s32 sal_ZipCheck(s8 *filename);
+s32 sal_ZipLoad(const char *filename, s8 *buffer, s32 bufferMaxSize, s32 *file_size);
+s32 sal_ZipSave(const char *filename, s8 *firstFilename, s8 *buffer, s32 size);
+s32 sal_ZipGetFirstCrc(const char *filename, s32 *crc);
+void sal_ZipGetFirstFilename(const char *filename, s8 *longfilename);
+s32 sal_ZipCheck(const char *filename);
 
-s32 sal_FileLoad(s8 *filename, u8 *buffer, u32 maxsize, u32 *filesize);
-s32 sal_FileSave(s8 *filename, u8 *buffer, u32 bufferSize);
-s32 sal_FileDelete(s8 *filename);
-s32 sal_FileExists(s8 *filename);
-s32 sal_FileGetSize(s8 *filename, u32 *filesize);
+s32 sal_FileLoad(const char *filename, u8 *buffer, u32 maxsize, u32 *filesize);
+s32 sal_FileSave(const char *filename, u8 *buffer, u32 bufferSize);
+s32 sal_FileDelete(const char *filename);
+s32 sal_FileExists(const char *filename);
+s32 sal_FileGetSize(const char *filename, u32 *filesize);
 u32 sal_FileGetCRC(u8 *data, u32 size);
 
 const char * sal_DirectoryGetHome(void);
-void sal_DirectorySplitFilename(s8 *wholeFilename, s8* path, s8 *filename, s8 *ext);
+void sal_DirectorySplitFilename(const char *wholeFilename, s8* path, s8 *filename, s8 *ext);
 void sal_DirectoryGetParent(s8 *path);
 s32 sal_DirectoryGetCurrent(s8 *path, u32 size);
-void sal_DirectoryCombine(s8 *path, s8 *name);
-s32 sal_DirectoryGetItemCount(s8 *path, s32 *returnItemCount);
-s32 sal_DirectoryGet(s8 *path, struct SAL_DIRECTORY_ENTRY *dir, s32 startIndex, s32 count);
-s32 sal_DirectoryCreate(s8 *path);
-s32 sal_DirectoryOpen(s8 *path, struct SAL_DIR *d);
+void sal_DirectoryCombine(s8 *path, const char *name);
+s32 sal_DirectoryGetItemCount(const char *path, s32 *returnItemCount);
+s32 sal_DirectoryGet(const char *path, struct SAL_DIRECTORY_ENTRY *dir,
+			s32 startIndex, s32 count);
+s32 sal_DirectoryCreate(const char *path);
+s32 sal_DirectoryOpen(const char *path, struct SAL_DIR *d);
 s32 sal_DirectoryClose(struct SAL_DIR *d);
 s32 sal_DirectoryRead(struct SAL_DIR *d, struct SAL_DIRECTORY_ENTRY *dir);
 

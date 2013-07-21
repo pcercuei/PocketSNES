@@ -141,20 +141,24 @@ struct SAVE_STATE
 //####################################
 //# Functions
 //####################################
-void MenuInit(const char *systemDir,struct MENU_OPTIONS *menuOptions);
+void MenuInit(const char *systemDir, struct MENU_OPTIONS *menuOptions);
 s32 MenuRun(s8 *romName);
-void LoadSram(s8 *path,s8 *romname,s8 *ext,s8 *srammem);
-void SaveSram(s8 *path,s8 *romname,s8 *ext,s8 *srammem);
-void DeleteSram(s8 *path,s8 *romname,s8 *ext);
-s32 SaveMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize, s32 showMessage);
-s32 LoadMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize, s32 showMessage);
-s32 DeleteMenuOptions(s8 *path, s8 *filename, s8 *ext, s32 showMessage);
+//void LoadSram(const char *path, const char *romname, const char *ext, const char *srammem);
+//void SaveSram(const char *path, const char *romname, const char *ext, const char *srammem);
+//void DeleteSram(const char *path, const char *romname, const char *ext);
+s32 SaveMenuOptions(const char *path, const char *filename, const char *ext,
+			const char *optionsmem, s32 maxSize, s32 showMessage);
+s32 LoadMenuOptions(const char *path, const char *filename, const char *ext,
+			const char *optionsmem, s32 maxSize, s32 showMessage);
+s32 DeleteMenuOptions(const char *path, const char *filename,
+			const char *ext, s32 showMessage);
 void DefaultMenuOptions(void);
 void MenuPause(void);
-void PrintTitle(s8 *title);
+void PrintTitle(const char *title);
 void PrintTile();
 void PrintBar(u32 givenY);
-s32 MenuMessageBox(s8 *message1,s8 *message2,s8 *message3,enum MENU_MESSAGE_BOX_MODE mode);
+s32 MenuMessageBox(const char *message1, const char *message2,
+			const char *message3, enum MENU_MESSAGE_BOX_MODE mode);
 
 
 #endif /* _MENU_H_ */

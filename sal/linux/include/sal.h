@@ -7,6 +7,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <dirent.h>
+
 typedef uint32_t u32;
 typedef int32_t  s32;
 typedef uint16_t u16;
@@ -88,7 +90,7 @@ typedef char     s8;
 
 struct SAL_DIR
 {
-	struct DIR *dir;
+	DIR *dir;
 };
 
 u32 sal_InputWait();

@@ -398,13 +398,13 @@ static char ROMFilename [_MAX_PATH];
 
 static void Freeze ();
 static int Unfreeze ();
-void FreezeStruct (char *name, void *base, FreezeData *fields,
+void FreezeStruct (const char *name, void *base, FreezeData *fields,
 		   int num_fields);
-void FreezeBlock (char *name, uint8 *block, int size);
+void FreezeBlock (const char *name, uint8 *block, int size);
 
-int UnfreezeStruct (char *name, void *base, FreezeData *fields,
+int UnfreezeStruct (const char *name, void *base, FreezeData *fields,
 		    int num_fields);
-int UnfreezeBlock (char *name, uint8 *block, int size);
+int UnfreezeBlock (const char *name, uint8 *block, int size);
 
 bool8_32 Snapshot (const char *filename)
 {
@@ -654,7 +654,7 @@ int FreezeSize (int size, int type)
     }
 }
 
-void FreezeStruct (char *name, void *base, FreezeData *fields,
+void FreezeStruct (const char *name, void *base, FreezeData *fields,
 		   int num_fields)
 {
     // Work out the size of the required block
@@ -741,7 +741,7 @@ void FreezeStruct (char *name, void *base, FreezeData *fields,
     delete block;
 }
 
-void FreezeBlock (char *name, uint8 *block, int size)
+void FreezeBlock (const char *name, uint8 *block, int size)
 {
     char buffer [512];
     sprintf (buffer, "%s:%06d:", name, size);
@@ -750,7 +750,7 @@ void FreezeBlock (char *name, uint8 *block, int size)
     
 }
 
-int UnfreezeStruct (char *name, void *base, FreezeData *fields,
+int UnfreezeStruct (const char *name, void *base, FreezeData *fields,
 		     int num_fields)
 {
     // Work out the size of the required block
@@ -844,7 +844,7 @@ int UnfreezeStruct (char *name, void *base, FreezeData *fields,
     return (result);
 }
 
-int UnfreezeBlock (char *name, uint8 *block, int size)
+int UnfreezeBlock (const char *name, uint8 *block, int size)
 {
     char buffer [20];
     int len = 0;

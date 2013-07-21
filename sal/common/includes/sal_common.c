@@ -111,7 +111,7 @@ void sal_VideoDrawRect(s32 x, s32 y, s32 width, s32 height, u32 color)
 	else sal_VideoDrawRect16(x,y,width,height,(u16)color);
 }
 
-static void sal_VideoPrint8(s32 x,s32 y,s8 *buffer,u8 color)
+static void sal_VideoPrint8(s32 x, s32 y, const char *buffer, u8 color)
 {
 	s32 m,b;
 	u8 *pix = (u8*)sal_VideoGetBuffer();
@@ -162,7 +162,7 @@ static void sal_VideoPrint8(s32 x,s32 y,s8 *buffer,u8 color)
 	}
 }
 
-static void sal_VideoPrint16(s32 x,s32 y,s8 *buffer,u16 color)
+static void sal_VideoPrint16(s32 x, s32 y, const char *buffer, u16 color)
 {
 	s32 m,b;
 	u16 *pix = (u16*)sal_VideoGetBuffer();
@@ -213,7 +213,7 @@ static void sal_VideoPrint16(s32 x,s32 y,s8 *buffer,u16 color)
 	}
 }
 
-void sal_VideoPrint(s32 x,s32 y,s8 *buffer,u32 color)
+void sal_VideoPrint(s32 x, s32 y, const char *buffer, u32 color)
 {
 	if (mBpp==8) sal_VideoPrint8(x,y,buffer,(u8)color);
 	else sal_VideoPrint16(x,y,buffer,(u16)color);
@@ -362,7 +362,7 @@ void sal_Sleep(u32 milliSecs)
 }
 #endif
 
-void sal_ZipGetFirstFilename(s8 *filename, s8 *longfilename)
+void sal_ZipGetFirstFilename(const char *filename, s8 *longfilename)
 {
    FILE *fd = NULL;
    u8 romname_len=0;
@@ -387,7 +387,7 @@ void sal_ZipGetFirstFilename(s8 *filename, s8 *longfilename)
     }
 }
 			
-s32 sal_ZipGetFirstCrc(s8 *filename, s32 *crc)
+s32 sal_ZipGetFirstCrc(const char *filename, s32 *crc)
 {
 	FILE *fd = NULL;
 	s32 retVal=SAL_OK;
@@ -407,7 +407,7 @@ s32 sal_ZipGetFirstCrc(s8 *filename, s32 *crc)
     return retVal;
 }
 
-s32 sal_ZipLoad(s8 *filename, s8 *buffer, s32 bufferMaxSize, s32 *file_size)
+s32 sal_ZipLoad(const char *filename, s8 *buffer, s32 bufferMaxSize, s32 *file_size)
 {
     s32 size = 0;
     s8 *buf = NULL;
@@ -498,7 +498,7 @@ s32 sal_ZipLoad(s8 *filename, s8 *buffer, s32 bufferMaxSize, s32 *file_size)
     Verifies if a file is a ZIP archive or not.
     Returns: 1= ZIP archive, 0= not a ZIP archive
 */
-s32 sal_ZipCheck(s8 *filename)
+s32 sal_ZipCheck(const char *filename)
 {
     u8 buf[2];
     FILE *fd = NULL;
@@ -510,7 +510,7 @@ s32 sal_ZipCheck(s8 *filename)
     return SAL_FALSE;
 }
 
-s32 sal_ZipSave(s8 *filename, s8 *firstFilename, s8 *buffer, s32 size)
+s32 sal_ZipSave(const char *filename, s8 *firstFilename, s8 *buffer, s32 size)
 {
     zipFile *fd = NULL;
     s32 ret = 0;
@@ -563,7 +563,7 @@ s32 sal_ZipSave(s8 *filename, s8 *firstFilename, s8 *buffer, s32 size)
     return SAL_OK;
 }
 
-s32 sal_FileGetSize(s8 *filename, u32 *filesize)
+s32 sal_FileGetSize(const char *filename, u32 *filesize)
 {
 	FILE *stream=NULL;
 
@@ -584,7 +584,7 @@ s32 sal_FileGetSize(s8 *filename, u32 *filesize)
 	}
 }
 
-s32 sal_FileLoad(s8 *filename, u8 *buffer, u32 maxsize, u32 *filesize)
+s32 sal_FileLoad(const char *filename, u8 *buffer, u32 maxsize, u32 *filesize)
 {
 	FILE *stream=NULL;
 	u32 size=0;
@@ -611,7 +611,7 @@ s32 sal_FileLoad(s8 *filename, u8 *buffer, u32 maxsize, u32 *filesize)
 
 }
 
-s32 sal_FileSave(s8 *filename, u8 *buffer, u32 bufferSize)
+s32 sal_FileSave(const char *filename, u8 *buffer, u32 bufferSize)
 {
 	FILE *stream=NULL;
 
@@ -628,7 +628,7 @@ s32 sal_FileSave(s8 *filename, u8 *buffer, u32 bufferSize)
 	}
 }
 
-s32 sal_FileExists(s8 *filename)
+s32 sal_FileExists(const char *filename)
 {
 	FILE *stream=NULL;
 
@@ -645,13 +645,13 @@ s32 sal_FileExists(s8 *filename)
 	}
 }
 
-s32 sal_FileDelete(s8 *filename)
+s32 sal_FileDelete(const char *filename)
 {
 	remove(filename);
 	return SAL_OK;
 }
 
-s32 sal_StringCompare(s8 *string1, s8 *string2)
+s32 sal_StringCompare(const char *string1, const char *string2)
 {
 	s32 i=0;
 	s8 c1=0,c2=0;
@@ -691,7 +691,7 @@ const char * sal_DirectoryGetHome(void)
 	return home;
 }
 
-void sal_DirectorySplitFilename(s8 *wholeFilename, s8* path, s8 *filename, s8 *ext)
+void sal_DirectorySplitFilename(const char *wholeFilename, s8* path, s8 *filename, s8 *ext)
 {
 	u32 len=(u32)strlen(wholeFilename);
 	s32 i=0,dot=-1,slash=-1;
@@ -745,7 +745,7 @@ void sal_DirectorySplitFilename(s8 *wholeFilename, s8* path, s8 *filename, s8 *e
 	}
 }
 
-void sal_DirectoryCombine(s8 *path, s8 *name)
+void sal_DirectoryCombine(s8 *path, const char *name)
 {
 	s32 len = strlen(path);
 	s32 i=0;

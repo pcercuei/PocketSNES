@@ -52,7 +52,8 @@ void DefaultMenuOptions(void)
 	mMenuOptions->autoSaveSram=0;
 }
 
-s32 LoadMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize, s32 showMessage)
+s32 LoadMenuOptions(const char *path, const char *filename, const char *ext,
+			const char *optionsmem, s32 maxSize, s32 showMessage)
 {
 	s8 fullFilename[SAL_MAX_PATH];
 	s8 _filename[SAL_MAX_PATH];
@@ -60,12 +61,13 @@ s32 LoadMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize
 	s8 _path[SAL_MAX_PATH];
 	s32 size=0;
 
-    	sal_DirectorySplitFilename(filename, _path, _filename, _ext);
+	sal_DirectorySplitFilename(filename, _path, _filename, _ext);
 	sprintf(fullFilename,"%s%s%s.%s",path,SAL_DIR_SEP,_filename,ext);
 	return sal_FileLoad(fullFilename,(u8*)optionsmem,maxSize,(u32*)&size);
 }
 
-s32 SaveMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize, s32 showMessage)
+s32 SaveMenuOptions(const char *path, const char *filename, const char *ext,
+			const char *optionsmem, s32 maxSize, s32 showMessage)
 {
 	s8 fullFilename[SAL_MAX_PATH];
 	s8 _filename[SAL_MAX_PATH];
@@ -85,7 +87,8 @@ s32 SaveMenuOptions(s8 *path, s8 *filename, s8 *ext, s8 *optionsmem, s32 maxSize
 	return sal_FileSave(fullFilename,(u8*)optionsmem,maxSize);
 }
 
-s32 DeleteMenuOptions(s8 *path, s8 *filename, s8 *ext, s32 showMessage)
+s32 DeleteMenuOptions(const char *path, const char *filename,
+			const char *ext, s32 showMessage)
 {
 	s8 fullFilename[SAL_MAX_PATH];
 	s8 _filename[SAL_MAX_PATH];
@@ -112,7 +115,8 @@ void MenuPause()
 	sal_InputWaitForRelease();
 }
 
-s32 MenuMessageBox(s8 *message1,s8 *message2,s8 *message3, enum MENU_MESSAGE_BOX_MODE mode)
+s32 MenuMessageBox(const char *message1, const char *message2,
+			const char *message3, enum MENU_MESSAGE_BOX_MODE mode)
 {
   s32 select=0;
   s32 subaction=-1;
@@ -186,12 +190,9 @@ void PrintTile()
 	return; 
 }
 
-void PrintTitle(s8 *title)
+void PrintTitle(const char *title)
 {	
 	sal_ImageDraw(mMenuHeader,MENU_HEADER_WIDTH, MENU_HEADER_HEIGHT,0,0);	
-	//sal_VideoPrint(6,38,title,SAL_RGB(0,0,0)); 
-	//sal_VideoPrint(130,38,DRSMS_VERSION,SAL_RGB(0,0,0));
-
 }
 
 void PrintBar(u32 givenY)
@@ -863,7 +864,7 @@ static s32 SaveStateSelect(s32 mode)
 }
 
 static
-void RenderMenu(s8 *menuName, s32 menuCount, s32 menuSmooth, s32 menufocus)
+void RenderMenu(const char *menuName, s32 menuCount, s32 menuSmooth, s32 menufocus)
 {
 	
 	s32 i=0;

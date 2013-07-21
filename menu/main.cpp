@@ -98,7 +98,7 @@ void erk (void)
       S9xMessage (0,0, "Erk!");
 }
 
-char *osd_GetPackDir(void)
+const char *osd_GetPackDir(void)
 {
       S9xMessage (0,0,"get pack dir");
       return ".";
