@@ -1,3 +1,5 @@
+#include <sal.h>
+#include <sys/time.h>
 
 static u32 mFrameTime;
 
@@ -30,8 +32,4 @@ s32 sal_TimerInit(s32 frametime)
 
 void sal_TimerClose(void) 
 {
-
 }
-
-
-

@@ -1,8 +1,15 @@
 #include <stdlib.h>
 #include <SDL.h>
 
+#include <sal.h>
+
+#define SOUND_BUFFER_COUNT 	4
+#define MAX_SOUND_LEN 	((48000/50)*2)
+
 static SDL_AudioSpec audiospec;
 static unsigned int buf_w, buf_r;
+static short mSoundBuffer[SOUND_BUFFER_COUNT][MAX_SOUND_LEN];
+static u32 mSoundSampleCount, mSoundBufferSize;
 
 static void sdl_audio_callback (void *userdata, Uint8 *stream, int len)
 {
@@ -32,8 +39,10 @@ s32 sal_AudioInit(s32 rate, s32 bits, s32 stereo, s32 Hz)
 	if (!stereo && audiospec.samples & 1)
 		audiospec.samples--;
 
+	 
 	mSoundSampleCount = audiospec.samples * audiospec.channels;
 	mSoundBufferSize = mSoundSampleCount * (bits >> 3);
+
 
 	audiospec.callback = sdl_audio_callback;
 
@@ -55,3 +64,13 @@ void sal_AudioClose(void)
 void sal_AudioSetVolume(s32 l, s32 r) 
 { 
 } 
+
+u32 sal_AudioGetSampleCount()
+{
+	return mSoundSampleCount;
+}
+
+u32 sal_AudioGetBufferSize()
+{
+	return mSoundBufferSize;
+}

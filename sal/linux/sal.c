@@ -3,23 +3,13 @@
 #include <dirent.h>
 #include <SDL/SDL.h>
 #include <sys/time.h>
-#include <png.h>
 #include "sal.h"
-#include "unzip.h"
-#include "zip.h"
 
 #include <SDL/SDL.h>
 
-#define SAL_FRAME_BUFFER_COUNT	4
-#define SOUND_BUFFER_COUNT 	4
-#define CPU_SPEED_COUNT		0
-#define AUDIO_RATE_COUNT	4
 #define PALETTE_BUFFER_LENGTH	256*2*4
-#define MAX_SOUND_LEN 	((48000/50)*2)
 
 static SDL_Surface *mScreen = NULL;
-static u32 mSoundSampleCount=0;
-static u32 mSoundBufferSize=0;
 static u32 mSoundThreadFlag=0;
 static u32 mSoundLastCpuSpeed=0;
 static u32 mPaletteBuffer[PALETTE_BUFFER_LENGTH];
@@ -28,10 +18,9 @@ static u32 *mPaletteLast=(u32*)&mPaletteBuffer[0];
 static u32 *mPaletteEnd=(u32*)&mPaletteBuffer[PALETTE_BUFFER_LENGTH];
 static u32 mInputFirst=0;
 
-s32 mAudioRateLookup[AUDIO_RATE_COUNT]={11025,22050,44100,48000};
 s32 mCpuSpeedLookup[1]={0};
 
-#include "sal_common.c"
+#include <sal_common.h>
 
 #define CASE(sym, key) \
   case SDLK_##sym: \
@@ -297,11 +286,6 @@ void sal_Reset(void)
 	sal_AudioClose();
 	SDL_Quit();
 }
-
-
-#include "sal_sound.c"
-#include "sal_filesys.c"
-#include "sal_timer.c"
 
 int mainEntry(int argc, char *argv[]);
 

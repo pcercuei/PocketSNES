@@ -1,8 +1,28 @@
+#ifndef __SAL_COMMON_H__
+#define __SAL_COMMON_H__
+
+#include <dirent.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#define SAL_OK						1
+#define SAL_ERROR					0
+#define SAL_TRUE					1
+#define SAL_FALSE					0
 
+typedef uint32_t u32;
+typedef int32_t  s32;
+typedef uint16_t u16;
+typedef int16_t  s16;
+typedef uint8_t  u8;
+typedef char     s8;
+
+extern u32 mInputRepeat;
+extern u32 mInputRepeatTimer[32];
+extern u32 mBpp;
+extern u32 mRefreshRate;
 
 enum  SAL_FILE_TYPE_ENUM
 {
@@ -15,6 +35,11 @@ struct SAL_DIRECTORY_ENTRY
 	s8 filename[SAL_MAX_PATH];
 	s8 displayName[SAL_MAX_PATH];
 	s32 type;
+};
+
+struct SAL_DIR
+{
+	DIR *dir;
 };
 
 s32 sal_Init(void);
@@ -42,8 +67,6 @@ u32 sal_AudioGetPrevBufferIndex();
 u32 sal_AudioGetNextBufferIndex(u32 index);
 s16 *sal_AudioGetBuffer(u32 bufferIndex);
 
-u32 sal_AudioGetBufferSize();
-u32 sal_AudioGetSampleCount();
 void sal_AudioSetVolume(s32 l, s32 r);
 u32 sal_AudioRatePrevious(u32 currRate);
 u32 sal_AudioRateNext(u32 currRate);
@@ -99,3 +122,4 @@ s32 sal_ImageLoad(const char *fname, void *dest, u32 width, u32 height);
 s32 sal_ImageDrawTiled(u16 *image, u32 width, u32 height, s32 xScroll, s32 yScroll, s32 x, s32 y);
 s32 sal_ImageDraw(u16 *image, u32 width, u32 height, s32 x, s32 y);
 
+#endif /* __SAL_COMMON_H__ */

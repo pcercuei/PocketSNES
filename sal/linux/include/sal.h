@@ -1,20 +1,9 @@
-
 #ifndef _SAL_H_
 #define _SAL_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
-#include <dirent.h>
-
-typedef uint32_t u32;
-typedef int32_t  s32;
-typedef uint16_t u16;
-typedef int16_t  s16;
-typedef uint8_t  u8;
-typedef char     s8;
 
 #ifdef __DINGUX__
 #define SAL_INPUT_INDEX_UP			20
@@ -77,10 +66,6 @@ typedef char     s8;
 #define SAL_MAX_PATH				256
 #define SAL_DIR_SEP				"/"
 #define SAL_DIR_SEP_BAD				"\\"
-#define SAL_OK						1
-#define SAL_ERROR					0
-#define SAL_TRUE					1
-#define SAL_FALSE					0
 
 #define SAL_RGB(r,g,b) (u16)((r) << 11 | (g) << 6 | (b) << 1 )
 #define SAL_RGB_PAL(r,g,b) SAL_RGB(r,g,b)
@@ -88,16 +73,13 @@ typedef char     s8;
 #define SAL_SEEK_END	SEEK_END
 #define SAL_SEEK_SET	SEEK_SET
 
-struct SAL_DIR
-{
-	DIR *dir;
-};
+#include "sal_common.h"
 
 u32 sal_InputWait();
 void sal_SubmitSamples(void);
 void *sal_GetCurrentAudioBuffer(void);
-
-#include "sal_common.h"
+u32 sal_AudioGetSampleCount();
+u32 sal_AudioGetBufferSize();
 
 #ifdef __cplusplus
 }
