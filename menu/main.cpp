@@ -382,7 +382,6 @@ int Run(int sound)
 	Settings.NextAPUEnabled = Settings.APUEnabled = sound;
 	sal_TimerInit(Settings.FrameTime);
 	done=sal_TimerRead()-1;
-	uint8 *soundbuf;
 
 	if (sound) {
 		/*
@@ -398,11 +397,6 @@ int Run(int sound)
 					mMenuOptions.stereo, sal_AudioGetBufferSize());
 		S9xSetPlaybackRate(mMenuOptions.soundRate);
 		S9xSetSoundMute (FALSE);
-
-		soundbuf = (uint8*) calloc(1, sal_AudioGetBufferSize());
-		if (!soundbuf) {
-			printf("Malloc failed.\n");
-		}
 
 	} else {
 		S9xSetSoundMute (TRUE);
@@ -425,8 +419,9 @@ int Run(int sound)
 				S9xMainLoop ();
 
 				if (sound) {
-					S9xMixSamples(soundbuf, sal_AudioGetSampleCount());
-					sal_SubmitSamples(soundbuf, sal_AudioGetBufferSize());
+					S9xMixSamples((uint8 *) sal_GetCurrentAudioBuffer(),
+								sal_AudioGetSampleCount());
+					sal_SubmitSamples();
 				}
 //				HandleQuickStateRequests();
 			}
@@ -437,10 +432,8 @@ int Run(int sound)
 		HandleQuickStateRequests();
   	}
 
-	if (sound) {
-		free(soundbuf);
+	if (sound)
 		sal_AudioClose();
-	}
 
 	mEnterMenu=0;
 	return mEnterMenu;

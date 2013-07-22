@@ -11,15 +11,15 @@ static void sdl_audio_callback (void *userdata, Uint8 *stream, int len)
 		buf_r = 0;
 }
 
-void sal_SubmitSamples(void *buff, int len)
+void *sal_GetCurrentAudioBuffer(void)
 {
-    SDL_LockAudio();
-	memcpy(mSoundBuffer[buf_w], buff, len);
+	return &mSoundBuffer[buf_w];
+}
 
+void sal_SubmitSamples(void)
+{
 	if (buf_w != buf_r && ++buf_w == SOUND_BUFFER_COUNT)
 		buf_w = 0;
-
-	SDL_UnlockAudio();
 }
 
 s32 sal_AudioInit(s32 rate, s32 bits, s32 stereo, s32 Hz)

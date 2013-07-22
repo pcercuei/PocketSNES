@@ -94,7 +94,8 @@ struct SAL_DIR
 };
 
 u32 sal_InputWait();
-void sal_SubmitSamples(void *buff, int len);
+void sal_SubmitSamples(void);
+void *sal_GetCurrentAudioBuffer(void);
 
 #include "sal_common.h"
 
