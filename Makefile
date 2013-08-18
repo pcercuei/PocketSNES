@@ -6,7 +6,10 @@ TARGET = PocketSNES
 CC  := $(CROSS_COMPILE)gcc
 CXX := $(CROSS_COMPILE)g++
 STRIP := $(CROSS_COMPILE)strip
-SDL_CONFIG ?= sdl-config
+
+SYSROOT := $(shell $(CC) --print-sysroot)
+SDL_CFLAGS := $(shell $(SYSROOT)/usr/bin/sdl-config --cflags)
+SDL_LIBS := $(shell $(SYSROOT)/usr/bin/sdl-config --libs)
 
 ifdef V
 	CMD:=
@@ -22,14 +25,12 @@ INCLUDE = -I pocketsnes \
 		-I menu -I pocketsnes/linux -I pocketsnes/snes9x
 
 CFLAGS = $(INCLUDE) -DRC_OPTIMIZED -D__LINUX__ -D__DINGUX__ \
-		 -g -O3 -pipe -ffunction-sections -ffast-math \
-		 $(shell $(SDL_CONFIG) --cflags) \
+		 -g -O3 -pipe -ffunction-sections -ffast-math $(SDL_CFLAGS) \
 		 #-flto -fwhole-program #-fsigned-char
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 
-LDFLAGS = $(CXXFLAGS) -lpthread -lz -lpng -lm -lgcc \
-		  $(shell $(SDL_CONFIG) --libs)
+LDFLAGS = $(CXXFLAGS) -lpthread -lz -lpng -lm -lgcc $(SDL_LIBS)
 
 # Find all source files
 SOURCE = pocketsnes/snes9x menu sal/linux sal
