@@ -518,6 +518,7 @@ int SnesInit()
 	Settings.TurboSkipFrames = 15;
 	Settings.ThreadSound = FALSE;
 	Settings.SoundSync = FALSE;
+	Settings.FixFrequency = TRUE;
 	//Settings.NoPatch = true;		
 
 	Settings.SuperFX = TRUE;
