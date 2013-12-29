@@ -1,43 +1,92 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
+
 #ifndef _65c816_h_
 #define _65c816_h_
 
@@ -64,40 +113,36 @@
 #define Negative  128
 #define Emulation 256
 
-#define CLEARCARRY()	(icpu->_Carry = 0)
-#define SETCARRY()		(icpu->_Carry = 1)
-#define SETZERO()		(icpu->_Zero = 0)
-#define CLEARZERO()		(icpu->_Zero = 1)
-#define SETIRQ_OP()		(reg->P.W |= IRQ)
-#define SETIRQ()		(Registers.P.W |= IRQ)
-#define CLEARIRQ()		(Registers.P.W &= ~IRQ)
-#define SETDECIMAL()	(reg->P.W |= Decimal)
-#define CLEARDECIMAL()	(Registers.P.W &= ~Decimal)
-#define CLEARDECIMAL_OP()	(reg->P.W &= ~Decimal)
-#define SETINDEX() (	(reg->P.W |= IndexFlag)
-#define CLEARINDEX()	(reg->P.W &= ~IndexFlag)
-#define SETMEMORY()		(reg->P.W |= MemoryFlag)
-#define CLEARMEMORY()	(reg->P.W &= ~MemoryFlag)
-#define SETOVERFLOW()	(icpu->_Overflow = 1)
-#define CLEAROVERFLOW() (icpu->_Overflow = 0)
-#define SETNEGATIVE()	(icpu->_Negative = 0x80)
-#define CLEARNEGATIVE() (icpu->_Negative = 0)
+#define ClearCarry() (ICPU._Carry = 0)
+#define SetCarry() (ICPU._Carry = 1)
+#define SetZero() (ICPU._Zero = 0)
+#define ClearZero() (ICPU._Zero = 1)
+#define SetIRQ() (ICPU.Registers.PL |= IRQ)
+#define ClearIRQ() (ICPU.Registers.PL &= ~IRQ)
+#define SetDecimal() (ICPU.Registers.PL |= Decimal)
+#define ClearDecimal() (ICPU.Registers.PL &= ~Decimal)
+#define SetIndex() (ICPU.Registers.PL |= IndexFlag)
+#define ClearIndex() (ICPU.Registers.PL &= ~IndexFlag)
+#define SetMemory() (ICPU.Registers.PL |= MemoryFlag)
+#define ClearMemory() (ICPU.Registers.PL &= ~MemoryFlag)
+#define SetOverflow() (ICPU._Overflow = 1)
+#define ClearOverflow() (ICPU._Overflow = 0)
+#define SetNegative() (ICPU._Negative = 0x80)
+#define ClearNegative() (ICPU._Negative = 0)
 
-#define CHECKZERO() (icpu->_Zero == 0)
-#define CHECKCARRY() (icpu->_Carry)
-#define CHECKIRQ() (reg->P.W & IRQ)
-#define CHECKDECIMAL() (reg->P.W & Decimal)
-#define CHECKINDEX() (reg->P.W & IndexFlag)
-#define CHECKMEMORY() (reg->P.W & MemoryFlag)
-#define CHECKOVERFLOW() (icpu->_Overflow)
-#define CHECKNEGATIVE() (icpu->_Negative & 0x80)
-#define CHECKEMULATION() (Registers.P.W & Emulation)
-#define CHECKEMULATION_OP() (reg->P.W & Emulation)
+#define CheckZero() (ICPU._Zero == 0)
+#define CheckCarry() (ICPU._Carry)
+#define CheckIRQ() (ICPU.Registers.PL & IRQ)
+#define CheckDecimal() (ICPU.Registers.PL & Decimal)
+#define CheckIndex() (ICPU.Registers.PL & IndexFlag)
+#define CheckMemory() (ICPU.Registers.PL & MemoryFlag)
+#define CheckOverflow() (ICPU._Overflow)
+#define CheckNegative() (ICPU._Negative & 0x80)
+#define CheckEmulation() (ICPU.Registers.P.W & Emulation)
 
-#define CLEARFLAGS(f) (Registers.P.W &= ~(f))
-#define SETFLAGS(f)   (Registers.P.W |=  (f))
-#define SETFLAGS_OP(f)   (reg->P.W |=  (f))
-#define CHECKFLAG(f)  (Registers.PL & (f))
+#define ClearFlags(f) (ICPU.Registers.P.W &= ~(f))
+#define SetFlags(f)   (ICPU.Registers.P.W |=  (f))
+#define CheckFlag(f)  (ICPU.Registers.PL & (f))
 
 typedef union
 {
@@ -110,19 +155,6 @@ typedef union
 } pair;
 
 struct SRegisters{
-    uint16_32	PC;
-    uint8_32	PB;
-    uint8_32	DB;
-    pair		P;
-    pair		A;
-    pair		D;
-    pair		S;
-    pair		X;
-    pair		Y;
-};
-
-/*
-struct SRegisters{
     uint8  PB;
     uint8  DB;
     pair   P;
@@ -133,23 +165,6 @@ struct SRegisters{
     pair   Y;
     uint16 PC;
 };
-*/
-struct SICPU
-{
-    uint8		*Speed;
-    struct		SOpcodes *S9xOpcodes;
-    uint8_32	_Carry;
-    uint8_32	_Zero;
-    uint8_32	_Negative;
-    uint8_32	_Overflow;
-    bool8_32	CPUExecuting;
-    uint32		ShiftedPB;
-    uint32		ShiftedDB;
-    uint32		Frame;
-    uint32		Scanline;
-    uint32		FrameAdvanceCount;
-};
-
-EXTERN_C struct SRegisters Registers;
 
 #endif
+

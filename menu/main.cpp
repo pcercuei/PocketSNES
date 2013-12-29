@@ -41,6 +41,19 @@ static int S9xCompareSDD1IndexEntries (const void *p1, const void *p2)
     return (*(uint32 *) p1 - *(uint32 *) p2);
 }
 
+bool JustifierOffscreen (void)
+{
+	return true;
+}
+
+void JustifierButtons (uint32&)
+{
+}
+
+void S9xProcessSound (unsigned int)
+{
+}
+
 extern "C"
 {
 
@@ -81,6 +94,11 @@ bool8 S9xOpenSnapshotFile (const char *fname, bool8 read_only, STREAM *file)
 	}
 
 	return (FALSE);	
+}
+
+const char* S9xGetSnapshotDirectory (void)
+{
+	return sal_DirectoryGetHome();
 }
 	
 void S9xCloseSnapshotFile (STREAM file)
@@ -391,7 +409,9 @@ int Run(int sound)
 		Settings.SoundPlaybackRate = mMenuOptions.soundRate;
 		Settings.Stereo = mMenuOptions.stereo ? TRUE : FALSE;
 		*/
+#ifndef FOREVER_16_BIT_SOUND
 		Settings.SixteenBitSound=true;
+#endif
 
 		sal_AudioInit(mMenuOptions.soundRate, 16,
 					mMenuOptions.stereo, Memory.ROMFramesPerSecond);
@@ -422,8 +442,10 @@ int Run(int sound)
 				S9xMainLoop ();
 
 				if (sound) {
-					S9xMixSamples((uint8 *) sal_GetCurrentAudioBuffer(),
-								sal_AudioGetSampleCount());
+					if (!Settings.SoundSync) {
+						S9xMixSamples((uint8 *) sal_GetCurrentAudioBuffer(),
+									sal_AudioGetSampleCount());
+					}
 					sal_SubmitSamples();
 				}
 //				HandleQuickStateRequests();
@@ -494,7 +516,7 @@ int SnesInit()
 	Settings.FrameTimePAL = 20000;
 	Settings.FrameTimeNTSC = 16667;
 	Settings.FrameTime = Settings.FrameTimeNTSC;
-	Settings.DisableSampleCaching = FALSE;
+	// Settings.DisableSampleCaching = FALSE;
 	Settings.DisableMasterVolume = TRUE;
 	Settings.Mouse = FALSE;
 	Settings.SuperScope = FALSE;
@@ -507,7 +529,9 @@ int SnesInit()
 	
 	Settings.ForceTransparency = FALSE;
 	Settings.Transparency = TRUE;
+#ifndef FOREVER_16_BIT
 	Settings.SixteenBit = TRUE;
+#endif
 	
 	Settings.SupportHiRes = FALSE;
 	Settings.NetPlay = FALSE;
@@ -542,8 +566,10 @@ int SnesInit()
 	if (Settings.ForceNoTransparency)
          Settings.Transparency = FALSE;
 
+#ifndef FOREVER_16_BIT
 	if (Settings.Transparency)
          Settings.SixteenBit = TRUE;
+#endif
 
 	Settings.HBlankStart = (256 * Settings.H_Max) / SNES_HCOUNTER_MAX;
 

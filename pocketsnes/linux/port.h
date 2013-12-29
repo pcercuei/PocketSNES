@@ -104,7 +104,13 @@ typedef short			int16_32;
 #define LSB_FIRST
 #define STATIC static
 #define FASTCALL
+
 #define PIXEL_FORMAT RGB565
+#define FOREVER_16_BIT
+// The above is used to disable the 16-bit graphics mode checks sprinkled
+// throughout the code, if the pixel format is always 16-bit.
+#define FOREVER_16_BIT_SOUND
+
 #define CHECK_SOUND()
 #define VOID void
 #define CPU_SHUTDOWN
@@ -114,6 +120,7 @@ typedef short			int16_32;
 #define ALIGN_BY_ONE  __attribute__ ((aligned (1), packed))
 #define LSB_FIRST
 #undef  FAST_LSB_WORD_ACCESS
+#define FAST_ALIGNED_LSB_WORD_ACCESS
 
 //#define sync()
 //#define getuid()

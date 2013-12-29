@@ -1,43 +1,92 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
+
 #ifndef _PPU_H_
 #define _PPU_H_
 
@@ -67,14 +116,14 @@ struct ClipData {
 };
 
 struct InternalPPU {
-    bool8_32  ColorsChanged;
+    bool8  ColorsChanged;
     uint8  HDMA;
-    bool8_32  HDMAStarted;
+    bool8  HDMAStarted;
     uint8  MaxBrightness;
-    bool8_32  LatchedBlanking;
-    bool8_32  OBJChanged;
-    bool8_32  RenderThisFrame;
-    bool8_32  DirectColourMapsNeedRebuild;
+    bool8  LatchedBlanking;
+    bool8  OBJChanged;
+    bool8  RenderThisFrame;
+    bool8  DirectColourMapsNeedRebuild;
     uint32 FrameCount;
     uint32 RenderedFramesCount;
     uint32 DisplayedRenderedFrameCount;
@@ -82,9 +131,16 @@ struct InternalPPU {
     uint32 FrameSkip;
     uint8  *TileCache [3];
     uint8  *TileCached [3];
-    bool8_32  FirstVRAMRead;
-    bool8_32  LatchedInterlace;
-    bool8_32  DoubleWidthPixels;
+#ifdef CORRECT_VRAM_READS
+    uint16 VRAMReadBuffer;
+#else
+    bool8  FirstVRAMRead;
+#endif
+    bool8  DoubleHeightPixels;
+    bool8  Interlace;
+    bool8  InterlaceSprites;
+    bool8  DoubleWidthPixels;
+    bool8  HalfWidthPixels;
     int    RenderedScreenHeight;
     int    RenderedScreenWidth;
     uint32 Red [256];
@@ -121,7 +177,7 @@ struct SPPU {
     uint8  Brightness;
 
     struct {
-	bool8_32 High;
+	bool8 High;
 	uint8 Increment;
 	uint16 Address;
 	uint16 Mask1;
@@ -138,13 +194,14 @@ struct SPPU {
 	uint16 SCSize;
     } BG [4];
 
-    bool8_32  CGFLIP;
+    bool8  CGFLIP;
     uint16 CGDATA [256]; 
     uint8  FirstSprite;
     uint8  LastSprite;
     struct SOBJ OBJ [128];
     uint8  OAMPriorityRotation;
     uint16 OAMAddr;
+    uint8  RangeTimeOver;
 
     uint8  OAMFlip;
     uint16 OAMTileAddress;
@@ -174,21 +231,21 @@ struct SPPU {
     uint16 ScreenHeight;
     uint32 WRAM;
     uint8  BG_Forced;
-    bool8_32  ForcedBlanking;
-    bool8_32  OBJThroughMain;
-    bool8_32  OBJThroughSub;
+    bool8  ForcedBlanking;
+    bool8  OBJThroughMain;
+    bool8  OBJThroughSub;
     uint8  OBJSizeSelect;
     uint16 OBJNameBase;
-    bool8_32  OBJAddition;
+    bool8  OBJAddition;
     uint8  OAMReadFlip;
     uint8  OAMData [512 + 32];
-    bool8_32  VTimerEnabled;
-    bool8_32  HTimerEnabled;
+    bool8  VTimerEnabled;
+    bool8  HTimerEnabled;
     short  HTimerPosition;
     uint8  Mosaic;
-    bool8_32  BGMosaic [4];
-    bool8_32  Mode7HFlip;
-    bool8_32  Mode7VFlip;
+    bool8  BGMosaic [4];
+    bool8  Mode7HFlip;
+    bool8  Mode7VFlip;
     uint8  Mode7Repeat;
     uint8  Window1Left;
     uint8  Window1Right;
@@ -198,14 +255,20 @@ struct SPPU {
     uint8  ClipWindowOverlapLogic [6];
     uint8  ClipWindow1Enable [6];
     uint8  ClipWindow2Enable [6];
-    bool8_32  ClipWindow1Inside [6];
-    bool8_32  ClipWindow2Inside [6];
-    bool8_32  RecomputeClipWindows;
+    bool8  ClipWindow1Inside [6];
+    bool8  ClipWindow2Inside [6];
+    bool8  RecomputeClipWindows;
     uint8  CGFLIPRead;
     uint16 OBJNameSelect;
-    bool8_32  Need16x8Mulitply;
+    bool8  Need16x8Mulitply;
     uint8  Joypad3ButtonReadPos;
     uint8  MouseSpeed[2];
+
+    // XXX Do these need to be added to snapshot.cpp?
+    uint16 OAMWriteRegister;
+    uint8 BGnxOFSbyte;
+    uint8 OpenBus1;
+    uint8 OpenBus2;
 };
 
 #define CLIP_OR 0
@@ -214,9 +277,9 @@ struct SPPU {
 #define CLIP_XNOR 3
 
 struct SDMA {
-    bool8_32  TransferDirection;
-    bool8_32  AAddressFixed;
-    bool8_32  AAddressDecrement;
+    bool8  TransferDirection;
+    bool8  AAddressFixed;
+    bool8  AAddressDecrement;
     uint8  TransferMode;
 
     uint8  ABank;
@@ -228,7 +291,7 @@ struct SDMA {
     uint16 TransferBytes;
 
     // H-DMA only:
-    bool8_32  HDMAIndirectAddressing;
+    bool8  HDMAIndirectAddressing;
     uint16 IndirectAddress;
     uint8  IndirectBank;
     uint8  Repeat;
@@ -239,6 +302,7 @@ struct SDMA {
 START_EXTERN_C
 void S9xUpdateScreen ();
 void S9xResetPPU ();
+void S9xSoftResetPPU ();
 void S9xFixColourBrightness ();
 void S9xUpdateJoypads ();
 void S9xProcessMouse(int which1);
@@ -263,287 +327,37 @@ END_EXTERN_C
 #include "gfx.h"
 #include "memmap.h"
 
-STATIC INLINE uint8 REGISTER_4212()
-{
-    GetBank = 0;
-    if (CPU.V_Counter >= PPU.ScreenHeight + FIRST_VISIBLE_LINE &&
-	CPU.V_Counter < PPU.ScreenHeight + FIRST_VISIBLE_LINE + 3)
-	GetBank = 1;
+typedef struct{
+	uint8 _5C77;
+	uint8 _5C78;
+	uint8 _5A22;
+} SnesModel;
 
-    GetBank |= CPU.Cycles >= Settings.HBlankStart ? 0x40 : 0;
-    if (CPU.V_Counter >= PPU.ScreenHeight + FIRST_VISIBLE_LINE)
-	GetBank |= 0x80; /* XXX: 0x80 or 0xc0 ? */
+START_EXTERN_C
+extern SnesModel* Model;
+extern SnesModel M1SNES;
+extern SnesModel M2SNES;
+END_EXTERN_C
 
-    return (GetBank);
-}
+#define MAX_5C77_VERSION 0x01
+#define MAX_5C78_VERSION 0x03
+#define MAX_5A22_VERSION 0x02
 
-STATIC INLINE void FLUSH_REDRAW ()
-{
-    if (IPPU.PreviousLine != IPPU.CurrentLine)
-	S9xUpdateScreen ();
-}
+extern uint8 REGISTER_4212();
+extern void FLUSH_REDRAW ();
+extern void REGISTER_2104 (uint8 byte);
+extern void REGISTER_2118 (uint8 Byte);
+extern void REGISTER_2118_tile (uint8 Byte);
+extern void REGISTER_2118_linear (uint8 Byte);
+extern void REGISTER_2119 (uint8 Byte);
+extern void REGISTER_2119_tile (uint8 Byte);
+extern void REGISTER_2119_linear (uint8 Byte);
+extern void REGISTER_2122(uint8 Byte);
+extern void REGISTER_2180(uint8 Byte);
 
-STATIC INLINE void REGISTER_2104 (uint8 byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    if (ppu->OAMAddr >= 0x110)
-	return;
-	
-    int addr = (ppu->OAMAddr << 1) + (ppu->OAMFlip & 1);
-    
-    if (byte != ppu->OAMData [addr])
-    {
-	FLUSH_REDRAW ();
-	ppu->OAMData [addr] = byte;
-	ippu->OBJChanged = TRUE;
-	if (addr & 0x200)
-	{
-	    // X position high bit, and sprite size (x4)
-	    struct SOBJ *pObj = &ppu->OBJ [(addr & 0x1f) * 4];
+//Platform specific input functions used by PPU.CPP
+void JustifierButtons(uint32&);
+bool JustifierOffscreen();
 
-	    pObj->HPos = (pObj->HPos & 0xFF) | SignExtend[(byte >> 0) & 1];
-	    pObj++->Size = byte & 2;
-	    pObj->HPos = (pObj->HPos & 0xFF) | SignExtend[(byte >> 2) & 1];
-	    pObj++->Size = byte & 8;
-	    pObj->HPos = (pObj->HPos & 0xFF) | SignExtend[(byte >> 4) & 1];
-	    pObj++->Size = byte & 32;
-	    pObj->HPos = (pObj->HPos & 0xFF) | SignExtend[(byte >> 6) & 1];
-	    pObj->Size = byte & 128;
-	}
-	else
-	{
-	    if (addr & 1)
-	    {
-		if (addr & 2)
-		{
-		    addr = ppu->OAMAddr >> 1;
-		    // Tile within group, priority, h and v flip.
-		    ppu->OBJ[addr].Name &= 0xFF;
-		    ppu->OBJ[addr].Name |= ((uint16) (byte & 1)) << 8;
-		    ppu->OBJ[addr].Palette = (byte >> 1) & 7;
-		    ppu->OBJ[addr].Priority = (byte >> 4) & 3;
-		    ppu->OBJ[addr].HFlip = (byte >> 6) & 1;
-		    ppu->OBJ[addr].VFlip = (byte >> 7) & 1;
-		}
-		else
-		{
-		    // Sprite Y position
-		    ppu->OBJ[ppu->OAMAddr >> 1].VPos = byte;
-		}
-	    }
-	    else
-	    {
-		if (addr & 2)
-		{
-		    // Tile group
-		    
-		    ppu->OBJ[addr = ppu->OAMAddr >> 1].Name &= 0x100;
-		    ppu->OBJ[addr].Name |= byte;
-		}
-		else
-		{
-		    // X position (low)
-		    ppu->OBJ[addr = ppu->OAMAddr >> 1].HPos &= 0xFF00;
-		    ppu->OBJ[addr].HPos |= byte;
-		}
-	    }
-	}
-    }
-    ppu->OAMFlip ^= 1;
-    if (!(ppu->OAMFlip & 1))
-	ppu->OAMAddr++;
-
-    mem->FillRAM [0x2104] = byte;
-}
-
-STATIC INLINE void REGISTER_2118 (uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 address;
-    if (ppu->VMA.FullGraphicCount)
-    {
-	uint32 rem = ppu->VMA.Address & ppu->VMA.Mask1;
-	address = (((ppu->VMA.Address & ~ppu->VMA.Mask1) +
-			 (rem >> ppu->VMA.Shift) +
-			 ((rem & (ppu->VMA.FullGraphicCount - 1)) << 3)) << 1) & 0xffff;
-	mem->VRAM [address] = Byte;
-    }
-    else
-    {
-	mem->VRAM[address = (ppu->VMA.Address << 1) & 0xFFFF] = Byte;
-    }
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (!ppu->VMA.High)
-    {
-#ifdef DEBUGGER
-	if (Settings.TraceVRAM && !CPU.InDMA)
-	{
-	    printf ("VRAM write byte: $%04X (%d,%d)\n", ppu->VMA.Address,
-		    mem->FillRAM[0x2115] & 3,
-		    (mem->FillRAM [0x2115] & 0x0c) >> 2);
-	}
-#endif	
-	ppu->VMA.Address += ppu->VMA.Increment;
-    }
-//    mem->FillRAM [0x2118] = Byte;
-}
-
-STATIC INLINE void REGISTER_2118_tile (uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 address;
-    uint32 rem = ppu->VMA.Address & ppu->VMA.Mask1;
-    address = (((ppu->VMA.Address & ~ppu->VMA.Mask1) +
-		 (rem >> ppu->VMA.Shift) +
-		 ((rem & (ppu->VMA.FullGraphicCount - 1)) << 3)) << 1) & 0xffff;
-    mem->VRAM [address] = Byte;
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (!ppu->VMA.High)
-	ppu->VMA.Address += ppu->VMA.Increment;
-//    mem->FillRAM [0x2118] = Byte;
-}
-
-STATIC INLINE void REGISTER_2118_linear (uint8 Byte,
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 address;
-    mem->VRAM[address = (ppu->VMA.Address << 1) & 0xFFFF] = Byte;
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (!ppu->VMA.High)
-	ppu->VMA.Address += ppu->VMA.Increment;
-//    mem->FillRAM [0x2118] = Byte;
-}
-
-STATIC INLINE void REGISTER_2119 (uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 address;
-    if (ppu->VMA.FullGraphicCount)
-    {
-	uint32 rem = ppu->VMA.Address & ppu->VMA.Mask1;
-	address = ((((ppu->VMA.Address & ~ppu->VMA.Mask1) +
-		    (rem >> ppu->VMA.Shift) +
-		    ((rem & (ppu->VMA.FullGraphicCount - 1)) << 3)) << 1) + 1) & 0xFFFF;
-	mem->VRAM [address] = Byte;
-    }
-    else
-    {
-	mem->VRAM[address = ((ppu->VMA.Address << 1) + 1) & 0xFFFF] = Byte;
-    }
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (ppu->VMA.High)
-    {
-#ifdef DEBUGGER
-	if (Settings.TraceVRAM && !CPU.InDMA)
-	{
-	    printf ("VRAM write word: $%04X (%d,%d)\n", ppu->VMA.Address,
-		    mem->FillRAM[0x2115] & 3,
-		    (mem->FillRAM [0x2115] & 0x0c) >> 2);
-	}
-#endif	
-	ppu->VMA.Address += ppu->VMA.Increment;
-    }
-//    mem->FillRAM [0x2119] = Byte;
-}
-
-STATIC INLINE void REGISTER_2119_tile (uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 rem = ppu->VMA.Address & ppu->VMA.Mask1;
-    uint32 address = ((((ppu->VMA.Address & ~ppu->VMA.Mask1) +
-		    (rem >> ppu->VMA.Shift) +
-		    ((rem & (ppu->VMA.FullGraphicCount - 1)) << 3)) << 1) + 1) & 0xFFFF;
-    mem->VRAM [address] = Byte;
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (ppu->VMA.High)
-	ppu->VMA.Address += ppu->VMA.Increment;
-//    mem->FillRAM [0x2119] = Byte;
-}
-
-STATIC INLINE void REGISTER_2119_linear (uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    uint32 address;
-    mem->VRAM[address = ((ppu->VMA.Address << 1) + 1) & 0xFFFF] = Byte;
-    ippu->TileCached [TILE_2BIT][address >> 4] = FALSE;
-    ippu->TileCached [TILE_4BIT][address >> 5] = FALSE;
-    ippu->TileCached [TILE_8BIT][address >> 6] = FALSE;
-    if (ppu->VMA.High)
-	ppu->VMA.Address += ppu->VMA.Increment;
-//    mem->FillRAM [0x2119] = Byte;
-}
-
-STATIC INLINE void REGISTER_2122(uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    // CG-RAM (palette) write
-
-    if (ppu->CGFLIP)
-    {
-	if ((Byte & 0x7f) != (ppu->CGDATA[ppu->CGADD] >> 8))
-	{
-#ifndef _SNESPPC
-	    if (Settings.SixteenBit)
 #endif
-		FLUSH_REDRAW ();
-	    ppu->CGDATA[ppu->CGADD] &= 0x00FF;
-	    ppu->CGDATA[ppu->CGADD] |= (Byte & 0x7f) << 8;
-	    ippu->ColorsChanged = TRUE;
-#ifndef _SNESPPC
-	    if (Settings.SixteenBit)
-#endif
-		{
-		ippu->Blue [ppu->CGADD] = ippu->XB [(Byte >> 2) & 0x1f];
-		ippu->Green [ppu->CGADD] = ippu->XB [(ppu->CGDATA[ppu->CGADD] >> 5) & 0x1f];
-		ippu->ScreenColors [ppu->CGADD] = (uint16) BUILD_PIXEL (ippu->Red [ppu->CGADD],
-							     ippu->Green [ppu->CGADD],
-							     ippu->Blue [ppu->CGADD]);
-	    }
-	}
-	ppu->CGADD++;
-    }
-    else
-    {
-	if (Byte != (uint8) (ppu->CGDATA[ppu->CGADD] & 0xff))
-	{
-#ifndef _SNESPPC
-	    if (Settings.SixteenBit)
-#endif
-		FLUSH_REDRAW ();
-	    ppu->CGDATA[ppu->CGADD] &= 0x7F00;
-	    ppu->CGDATA[ppu->CGADD] |= Byte;
-	    ippu->ColorsChanged = TRUE;
-#ifndef _SNESPPC
-	    if (Settings.SixteenBit)
-#endif
-	    {
-		ippu->Red [ppu->CGADD] = ippu->XB [Byte & 0x1f];
-		ippu->Green [ppu->CGADD] = ippu->XB [(ppu->CGDATA[ppu->CGADD] >> 5) & 0x1f];
-		ippu->ScreenColors [ppu->CGADD] = (uint16) BUILD_PIXEL (ippu->Red [ppu->CGADD],
-							     ippu->Green [ppu->CGADD],
-							     ippu->Blue [ppu->CGADD]);
-	    }
-	}
-    }
-    ppu->CGFLIP ^= 1;
-//    mem->FillRAM [0x2122] = Byte;
-}
 
-STATIC INLINE void REGISTER_2180(uint8 Byte, 
-		CMemory * mem, struct InternalPPU * ippu, struct SPPU * ppu)
-{
-    mem->RAM[ppu->WRAM++] = Byte;
-    ppu->WRAM &= 0x1FFFF;
-    mem->FillRAM [0x2180] = Byte;
-}
-#endif

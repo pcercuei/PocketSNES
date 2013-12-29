@@ -1,47 +1,96 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
-/**********************************************************************************************/
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
+
+/*****************************************************************************/
 /* CPU-S9xOpcodes.CPP                                                                            */
 /* This file contains all the opcodes                                                         */
-/**********************************************************************************************/
+/*****************************************************************************/
 
 #include "snes9x.h"
 #include "memmap.h"
@@ -49,21 +98,7 @@
 #include "missing.h"
 #include "apu.h"
 #include "sa1.h"
-
-START_EXTERN_C
-/*
-extern uint8 A1, A2, A3, A4, W1, W2, W3, W4;
-extern uint8 Ans8;
-extern uint16 Ans16;
-extern uint32 Ans32;
-extern uint8 Work8;
-extern uint16 Work16;
-extern uint32 Work32;
-extern signed char Int8;
-extern short Int16;
-extern long Int32;
-*/
-END_EXTERN_C
+#include "spc7110.h"
 
 #include "cpuexec.h"
 #include "cpuaddr.h"
@@ -71,2384 +106,3207 @@ END_EXTERN_C
 #include "cpumacro.h"
 #include "apu.h"
 
+EXTERN_C long OpAddress;
+
+// For use with the opcodes whose functions here examine the OpAddress.
+static void OpAddressPassthrough (long Addr)
+{
+    OpAddress = Addr;
+}
+
 /* ADC *************************************************************************************** */
-static void Op69M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op69M1 (void)
 {
-    long OpAddress = Immediate8 (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    Immediate8 (READ, ADC8);
 }
 
-static void Op69M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op69M0 (void)
 {
-    long OpAddress = Immediate16 (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    Immediate16 (READ, ADC16);
 }
 
-static void Op65M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op65M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op65M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op65M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op75M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op75M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op75M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op75M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op72M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op72M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op72M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op72M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op61M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op61M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op61M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op61M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op71M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op71M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op71M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op71M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op67M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op67M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op67M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op67M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op77M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op77M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op77M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op77M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op6DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6DM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op6DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6DM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op7DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7DM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op7DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7DM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op79M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op79M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op79M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op79M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op6FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6FM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op6FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6FM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op7FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7FM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op7FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7FM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op63M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op63M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op63M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op63M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op73M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op73M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    ADC8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, ADC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void Op73M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op73M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    ADC16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, ADC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* AND *************************************************************************************** */
-static void Op29M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op29M1 (void)
 {
-    reg->AL &= *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.AL &= *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op29M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op29M0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->A.W &= *(uint16 *) cpu->PC;
+    ICPU.Registers.A.W &= *(uint16 *) CPU.PC;
 #else
-    reg->A.W &= *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.A.W &= *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->A.W);
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void Op25M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op25M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op25M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op25M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op35M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op35M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op35M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op35M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op32M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op32M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op32M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op32M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op21M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op21M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op21M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op21M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op31M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op31M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op31M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op31M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op27M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op27M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op27M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op27M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op37M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op37M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op37M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op37M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op2DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2DM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op2DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2DM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op3DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3DM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op3DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3DM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op39M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op39M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op39M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op39M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op2FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2FM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op2FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2FM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op3FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3FM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op3FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3FM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op23M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op23M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op23M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op23M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op33M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op33M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    AND8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, AND8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void Op33M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op33M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    AND16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, AND16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 /**********************************************************************************************/
 
 /* ASL *************************************************************************************** */
-static void Op0AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0AM1 (void)
 {
-    A_ASL8 (reg, icpu, cpu);
+    A_ASL8 ();
 }
 
-static void Op0AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0AM0 (void)
 {
-    A_ASL16 (reg, icpu, cpu);
+    A_ASL16 ();
 }
 
-static void Op06M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op06M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ASL8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ASL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op06M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op06M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ASL16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ASL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op16M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op16M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ASL8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ASL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op16M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op16M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ASL16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ASL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op0EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0EM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ASL8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ASL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op0EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0EM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ASL16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ASL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op1EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1EM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ASL8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ASL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op1EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1EM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ASL16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ASL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 /**********************************************************************************************/
 
 /* BIT *************************************************************************************** */
-static void Op89M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op89M1 (void)
 {
-    icpu->_Zero = reg->AL & *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU._Zero = ICPU.Registers.AL & *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void Op89M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op89M0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    icpu->_Zero = (reg->A.W & *(uint16 *) cpu->PC) != 0;
+    ICPU._Zero = (ICPU.Registers.A.W & *(uint16 *) CPU.PC) != 0;
 #else
-    icpu->_Zero = (reg->A.W & (*cpu->PC + (*(cpu->PC + 1) << 8))) != 0;
+    ICPU._Zero = (ICPU.Registers.A.W & (*CPU.PC + (*(CPU.PC + 1) << 8))) != 0;
 #endif	
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    cpu->PC += 2;
+    CPU.PC += 2;
 }
 
-static void Op24M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op24M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    BIT8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, BIT8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op24M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op24M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    BIT16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, BIT16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op34M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op34M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    BIT8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, BIT8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op34M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op34M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    BIT16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, BIT16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op2CM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2CM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    BIT8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, BIT8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op2CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2CM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    BIT16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, BIT16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op3CM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3CM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    BIT8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, BIT8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op3CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3CM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    BIT16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, BIT16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 /**********************************************************************************************/
 
 /* CMP *************************************************************************************** */
-static void OpC9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC9M1 (void)
 {
-    int32 Int32 = (int) reg->AL - (int) *cpu->PC++;
-    icpu->_Carry = Int32 >= 0;
-    SETZN8 ((uint8) Int32);
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    int32 Int32 = (int) ICPU.Registers.AL - (int) *CPU.PC++;
+    ICPU._Carry = Int32 >= 0;
+    SetZN8 ((uint8) Int32);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void OpC9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC9M0 (void)
 {
+    int32 Int32;
 #ifdef FAST_LSB_WORD_ACCESS    
-    int32 Int32 = (long) reg->A.W - (long) *(uint16 *) cpu->PC;
+    Int32 = (long) ICPU.Registers.A.W - (long) *(uint16 *) CPU.PC;
 #else
-    int32 Int32 = (long) reg->A.W -
-	    (long) (*cpu->PC + (*(cpu->PC + 1) << 8));
+    Int32 = (long) ICPU.Registers.A.W -
+	    (long) (*CPU.PC + (*(CPU.PC + 1) << 8));
 #endif
-    icpu->_Carry = Int32 >= 0;
-    SETZN16 ((uint16) Int32);
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    ICPU._Carry = Int32 >= 0;
+    SetZN16 ((uint16) Int32);
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
 }
 
-static void OpC5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC5M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC5M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD5M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpD5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD5M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpD2M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD2M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD2M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD2M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC1M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC1M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD1M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD1M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC7M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC7M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD7M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpD7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD7M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpCDM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCDM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpCDM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCDM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpDDM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDDM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpDDM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDDM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpD9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD9M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpD9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD9M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpCFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCFM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpCFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCFM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpDFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDFM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpDFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDFM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpC3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC3M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpC3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC3M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpD3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD3M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    CMP8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, CMP8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void OpD3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD3M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    CMP16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, CMP16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* CMX *************************************************************************************** */
-static void OpE0X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE0X1 (void)
 {
-    int32 Int32 = (int) reg->XL - (int) *cpu->PC++;
-    icpu->_Carry = Int32 >= 0;
-    SETZN8 ((uint8) Int32);
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    int32 Int32 = (int) ICPU.Registers.XL - (int) *CPU.PC++;
+    ICPU._Carry = Int32 >= 0;
+    SetZN8 ((uint8) Int32);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void OpE0X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE0X0 (void)
 {
+    int32 Int32;
 #ifdef FAST_LSB_WORD_ACCESS    
-    int32 Int32 = (long) reg->X.W - (long) *(uint16 *) cpu->PC;
+    Int32 = (long) ICPU.Registers.X.W - (long) *(uint16 *) CPU.PC;
 #else
-    int32 Int32 = (long) reg->X.W -
-	    (long) (*cpu->PC + (*(cpu->PC + 1) << 8));
+    Int32 = (long) ICPU.Registers.X.W -
+	    (long) (*CPU.PC + (*(CPU.PC + 1) << 8));
 #endif
-    icpu->_Carry = Int32 >= 0;
-    SETZN16 ((uint16) Int32);
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    ICPU._Carry = Int32 >= 0;
+    SetZN16 ((uint16) Int32);
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
 }
 
-static void OpE4X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE4X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMX8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE4X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE4X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMX16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpECX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpECX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMX8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpECX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpECX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMX16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* CMY *************************************************************************************** */
-static void OpC0X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC0X1 (void)
 {
-    int32 Int32 = (int) reg->YL - (int) *cpu->PC++;
-    icpu->_Carry = Int32 >= 0;
-    SETZN8 ((uint8) Int32);
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    int32 Int32 = (int) ICPU.Registers.YL - (int) *CPU.PC++;
+    ICPU._Carry = Int32 >= 0;
+    SetZN8 ((uint8) Int32);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void OpC0X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC0X0 (void)
 {
+    int32 Int32;
 #ifdef FAST_LSB_WORD_ACCESS    
-    int32 Int32 = (long) reg->Y.W - (long) *(uint16 *) cpu->PC;
+    Int32 = (long) ICPU.Registers.Y.W - (long) *(uint16 *) CPU.PC;
 #else
-    int32 Int32 = (long) reg->Y.W -
-	    (long) (*cpu->PC + (*(cpu->PC + 1) << 8));
+    Int32 = (long) ICPU.Registers.Y.W -
+	    (long) (*CPU.PC + (*(CPU.PC + 1) << 8));
 #endif
-    icpu->_Carry = Int32 >= 0;
-    SETZN16 ((uint16) Int32);
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    ICPU._Carry = Int32 >= 0;
+    SetZN16 ((uint16) Int32);
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
 }
 
-static void OpC4X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC4X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMY8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpC4X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC4X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    CMY16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, CMY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpCCX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCCX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMY8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpCCX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCCX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    CMY16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, CMY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* DEC *************************************************************************************** */
-static void Op3AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3AM1 (void)
 {
-    A_DEC8 (reg, icpu, cpu);
+    A_DEC8 ();
 }
 
-static void Op3AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3AM0 (void)
 {
-    A_DEC16 (reg, icpu, cpu);
+    A_DEC16 ();
 }
 
-static void OpC6M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC6M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    DEC8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, DEC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpC6M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC6M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    DEC16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, DEC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpD6M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD6M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    DEC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, DEC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpD6M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD6M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    DEC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, DEC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpCEM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCEM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    DEC8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, DEC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpCEM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCEM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    DEC16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, DEC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpDEM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDEM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    DEC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, DEC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpDEM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDEM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    DEC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, DEC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* EOR *************************************************************************************** */
-static void Op49M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op49M1 (void)
 {
-    reg->AL ^= *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.AL ^= *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op49M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op49M0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->A.W ^= *(uint16 *) cpu->PC;
+    ICPU.Registers.A.W ^= *(uint16 *) CPU.PC;
 #else
-    reg->A.W ^= *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.A.W ^= *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->A.W);
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void Op45M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op45M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op45M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op45M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op55M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op55M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op55M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op55M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op52M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op52M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op52M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op52M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op41M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op41M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op41M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op41M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op51M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op51M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op51M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op51M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op47M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op47M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op47M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op47M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op57M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op57M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op57M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op57M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op4DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4DM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op4DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4DM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op5DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5DM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op5DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5DM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op59M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op59M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op59M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op59M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op4FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4FM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op4FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4FM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op5FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5FM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op5FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5FM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op43M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op43M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op43M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op43M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op53M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op53M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    EOR8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, EOR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void Op53M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op53M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    EOR16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, EOR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* INC *************************************************************************************** */
-static void Op1AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1AM1 (void)
 {
-    A_INC8 (reg, icpu, cpu);
+    A_INC8 ();
 }
 
-static void Op1AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1AM0 (void)
 {
-    A_INC16 (reg, icpu, cpu);
+    A_INC16 ();
 }
 
-static void OpE6M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE6M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    INC8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, INC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpE6M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE6M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    INC16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, INC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpF6M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF6M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    INC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, INC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpF6M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF6M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    INC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, INC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpEEM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEEM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    INC8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, INC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpEEM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEEM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    INC16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, INC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpFEM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFEM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    INC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, INC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void OpFEM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFEM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    INC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, INC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
 /**********************************************************************************************/
 /* LDA *************************************************************************************** */
-static void OpA9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA9M1 (void)
 {
-    reg->AL = *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.AL = *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void OpA9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA9M0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->A.W = *(uint16 *) cpu->PC;
+    ICPU.Registers.A.W = *(uint16 *) CPU.PC;
 #else
-    reg->A.W = *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.A.W = *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
 
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->A.W);
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void OpA5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA5M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA5M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB5M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpB5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB5M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpB2M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB2M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB2M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB2M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA1M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA1M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB1M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB1M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA7M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA7M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB7M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB7M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpADM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpADM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpADM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpADM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBDM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBDM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBDM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBDM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpB9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB9M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpB9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB9M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpAFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAFM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpAFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAFM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpBFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBFM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpBFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBFM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpA3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA3M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpA3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA3M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpB3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB3M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    LDA8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, LDA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void OpB3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB3M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    LDA16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, LDA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* LDX *************************************************************************************** */
-static void OpA2X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA2X1 (void)
 {
-    reg->XL = *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.XL = *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->XL);
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void OpA2X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA2X0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->X.W = *(uint16 *) cpu->PC;
+    ICPU.Registers.X.W = *(uint16 *) CPU.PC;
 #else
-    reg->X.W = *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.X.W = *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->X.W);
+    SetZN16 (ICPU.Registers.X.W);
 }
 
-static void OpA6X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA6X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDX8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA6X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA6X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDX16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB6X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB6X1 (void)
 {
-    long OpAddress = DirectIndexedY (reg, icpu, cpu);
-    LDX8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedY (READ, LDX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpB6X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB6X0 (void)
 {
-    long OpAddress = DirectIndexedY (reg, icpu, cpu);
-    LDX16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedY (READ, LDX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpAEX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAEX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDX8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpAEX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAEX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDX16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBEX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBEX1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    LDX8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, LDX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBEX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBEX0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    LDX16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, LDX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 /**********************************************************************************************/
 
 /* LDY *************************************************************************************** */
-static void OpA0X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA0X1 (void)
 {
-    reg->YL = *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.YL = *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->YL);
+    SetZN8 (ICPU.Registers.YL);
 }
 
-static void OpA0X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA0X0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->Y.W = *(uint16 *) cpu->PC;
+    ICPU.Registers.Y.W = *(uint16 *) CPU.PC;
 #else
-    reg->Y.W = *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.Y.W = *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
 
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->Y.W);
+    SetZN16 (ICPU.Registers.Y.W);
 }
 
-static void OpA4X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA4X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDY8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpA4X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA4X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LDY16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, LDY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpB4X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB4X1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LDY8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, LDY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpB4X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB4X0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LDY16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, LDY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpACX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpACX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDY8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpACX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpACX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LDY16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, LDY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBCX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBCX1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LDY8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, LDY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpBCX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBCX0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LDY16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, LDY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 /**********************************************************************************************/
 
 /* LSR *************************************************************************************** */
-static void Op4AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4AM1 (void)
 {
-    A_LSR8 (reg, icpu, cpu);
+    A_LSR8 ();
 }
 
-static void Op4AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4AM0 (void)
 {
-    A_LSR16 (reg, icpu, cpu);
+    A_LSR16 ();
 }
 
-static void Op46M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op46M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LSR8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, LSR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op46M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op46M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    LSR16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, LSR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op56M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op56M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LSR8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, LSR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op56M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op56M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    LSR16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, LSR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op4EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4EM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LSR8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, LSR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op4EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4EM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    LSR16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, LSR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op5EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5EM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LSR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, LSR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op5EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5EM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    LSR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, LSR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* ORA *************************************************************************************** */
-static void Op09M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op09M1 (void)
 {
-    reg->AL |= *cpu->PC++;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed;
+    ICPU.Registers.AL |= *CPU.PC++;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
-    SETZN8 (reg->AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op09M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op09M0 (void)
 {
 #ifdef FAST_LSB_WORD_ACCESS
-    reg->A.W |= *(uint16 *) cpu->PC;
+    ICPU.Registers.A.W |= *(uint16 *) CPU.PC;
 #else
-    reg->A.W |= *cpu->PC + (*(cpu->PC + 1) << 8);
+    ICPU.Registers.A.W |= *CPU.PC + (*(CPU.PC + 1) << 8);
 #endif
-    cpu->PC += 2;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2;
+    CPU.PC += 2;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
 #endif
-    SETZN16 (reg->A.W);
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void Op05M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op05M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op05M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op05M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op15M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op15M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op15M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op15M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op12M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op12M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op12M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op12M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op01M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op01M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op01M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op01M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op11M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op11M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op11M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op11M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op07M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op07M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op07M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op07M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op17M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op17M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op17M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op17M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op0DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0DM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op0DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0DM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op1DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1DM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op1DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1DM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op19M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op19M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op19M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op19M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op0FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0FM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op0FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0FM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op1FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1FM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op1FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1FM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op03M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op03M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op03M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op03M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void Op13M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op13M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    ORA8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, ORA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void Op13M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op13M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    ORA16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, ORA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* ROL *************************************************************************************** */
-static void Op2AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2AM1 (void)
 {
-    A_ROL8 (reg, icpu, cpu);
+    A_ROL8 ();
 }
 
-static void Op2AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2AM0 (void)
 {
-    A_ROL16 (reg, icpu, cpu);
+    A_ROL16 ();
 }
 
-static void Op26M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op26M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ROL8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ROL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op26M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op26M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ROL16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ROL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op36M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op36M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ROL8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ROL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op36M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op36M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ROL16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ROL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op2EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2EM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ROL8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ROL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op2EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op2EM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ROL16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ROL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op3EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3EM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ROL8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ROL8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op3EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3EM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ROL16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ROL16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 /**********************************************************************************************/
 
 /* ROR *************************************************************************************** */
-static void Op6AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6AM1 (void)
 {
-    A_ROR8 (reg, icpu, cpu);
+    A_ROR8 ();
 }
 
-static void Op6AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6AM0 (void)
 {
-    A_ROR16 (reg, icpu, cpu);
+    A_ROR16 ();
 }
 
-static void Op66M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op66M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ROR8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ROR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op66M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op66M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    ROR16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, ROR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op76M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op76M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ROR8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ROR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op76M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op76M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    ROR16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (MODIFY, ROR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE /* memory */ + ONE_CYCLE /* opcode */;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op6EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6EM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ROR8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ROR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op6EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6EM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    ROR16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, ROR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op7EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7EM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ROR8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ROR8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op7EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7EM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    ROR16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (MODIFY, ROR16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 /**********************************************************************************************/
 
 /* SBC *************************************************************************************** */
-static void OpE9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE9M1 (void)
 {
-    long OpAddress = Immediate8 (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    Immediate8 (READ, SBC8);
 }
 
-static void OpE9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE9M0 (void)
 {
-    long OpAddress = Immediate16 (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    Immediate16 (READ, SBC16);
 }
 
-static void OpE5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE5M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    Direct (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE5M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    Direct (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF5M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF5M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpF5M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF5M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void OpF2M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF2M1 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF2M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF2M0 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE1M1 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE1M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF1M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF1M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF1M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF1M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE7M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpE7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE7M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF7M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF7M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpF7M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF7M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void OpEDM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEDM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpEDM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEDM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    Absolute (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpFDM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFDM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpFDM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFDM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpF9M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF9M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpF9M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF9M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void OpEFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEFM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpEFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEFM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpFFM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFFM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpFFM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFFM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLongIndexedX (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void OpE3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE3M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpE3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE3M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    StackRelative (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
 }
 
-static void OpF3M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF3M1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    SBC8 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, SBC8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 
-static void OpF3M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF3M0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    SBC16 (OpAddress, reg, icpu, cpu);
+    StackRelativeIndirectIndexed (READ, SBC16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 /**********************************************************************************************/
 
 /* STA *************************************************************************************** */
-static void Op85M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op85M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op85M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = Direct (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op95M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op95M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op92M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op92M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
-}
-
-static void Op81M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
-{
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
-#ifdef noVAR_CYCLES
-    if (CHECKINDEX ())
-	cpu->Cycles += ONE_CYCLE;
+    Direct (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void Op81M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op85M0 (void)
 {
-    long OpAddress = DirectIndexedIndirect (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
-#ifdef noVAR_CYCLES
-    if (CHECKINDEX ())
-	cpu->Cycles += ONE_CYCLE;
+    Direct (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
 #endif
 }
 
-static void Op91M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op95M1 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op91M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op95M0 (void)
 {
-    long OpAddress = DirectIndirectIndexed (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op87M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op92M1 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op87M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op92M0 (void)
 {
-    long OpAddress = DirectIndirectLong (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirect (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op97M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op81M1 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
+#ifdef noVAR_CYCLES
+    if (CheckIndex ())
+	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op97M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op81M0 (void)
 {
-    long OpAddress = DirectIndirectIndexedLong (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedIndirect (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
+#ifdef noVAR_CYCLES
+    if (CheckIndex ())
+	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op8DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op91M1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op8DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op91M0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexed (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op9DM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op87M1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op9DM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op87M0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectLong (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op99M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op97M1 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op99M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op97M0 (void)
 {
-    long OpAddress = AbsoluteIndexedY (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    DirectIndirectIndexedLong (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op8FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8DM1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op8FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8DM0 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op9FM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9DM1 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op9FM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9DM0 (void)
 {
-    long OpAddress = AbsoluteLongIndexedX (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op83M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op99M1 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op83M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op99M0 (void)
 {
-    long OpAddress = StackRelative (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedY (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op93M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8FM1 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    STA8 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
 }
 
-static void Op93M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8FM0 (void)
 {
-    long OpAddress = StackRelativeIndirectIndexed (reg, icpu, cpu);
-    STA16 (OpAddress, reg, icpu, cpu);
+    AbsoluteLong (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+}
+
+static void Op9FM1 (void)
+{
+    AbsoluteLongIndexedX (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+}
+
+static void Op9FM0 (void)
+{
+    AbsoluteLongIndexedX (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+}
+
+static void Op83M1 (void)
+{
+    StackRelative (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
+}
+
+static void Op83M0 (void)
+{
+    StackRelative (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+#endif
+}
+
+static void Op93M1 (void)
+{
+    StackRelativeIndirectIndexed (WRITE, STA8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
+}
+
+static void Op93M0 (void)
+{
+    StackRelativeIndirectIndexed (WRITE, STA16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + TWO_CYCLES;
+#endif
 }
 /**********************************************************************************************/
 
 /* STX *************************************************************************************** */
-static void Op86X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op86X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STX8 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op86X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op86X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STX16 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op96X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op96X1 (void)
 {
-    long OpAddress = DirectIndexedY (reg, icpu, cpu);
-    STX8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedY (WRITE, STX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op96X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op96X0 (void)
 {
-    long OpAddress = DirectIndexedY (reg, icpu, cpu);
-    STX16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedY (WRITE, STX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op8EX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8EX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STX8 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STX8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op8EX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8EX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STX16 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STX16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 /**********************************************************************************************/
 
 /* STY *************************************************************************************** */
-static void Op84X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op84X1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STY8 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op84X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op84X0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STY16 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op94X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op94X1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STY8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op94X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op94X0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STY16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op8CX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8CX1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STY8 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STY8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op8CX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8CX0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STY16 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STY16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 /**********************************************************************************************/
 
 /* STZ *************************************************************************************** */
-static void Op64M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op64M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STZ8 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STZ8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op64M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op64M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    STZ16 (OpAddress, reg, icpu, cpu);
+    Direct (WRITE, STZ16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
 }
 
-static void Op74M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op74M1 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STZ8 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STZ8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op74M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op74M0 (void)
 {
-    long OpAddress = DirectIndexedX (reg, icpu, cpu);
-    STZ16 (OpAddress, reg, icpu, cpu);
+    DirectIndexedX (WRITE, STZ16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
+//    if (ICPU.Registers.DL != 0)
+//	CPU.Cycles += TWO_CYCLES;
+//    else
+//	CPU.Cycles += ONE_CYCLE;
+#endif
 }
 
-static void Op9CM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9CM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STZ8 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STZ8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op9CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9CM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    STZ16 (OpAddress, reg, icpu, cpu);
+    Absolute (WRITE, STZ16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op9EM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9EM1 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    STZ8 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (WRITE, STZ8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
-static void Op9EM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9EM0 (void)
 {
-    long OpAddress = AbsoluteIndexedX (reg, icpu, cpu);
-    STZ16 (OpAddress, reg, icpu, cpu);
+    AbsoluteIndexedX (WRITE, STZ16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
 }
 
 /**********************************************************************************************/
 
 /* TRB *************************************************************************************** */
-static void Op14M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op14M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    TRB8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, TRB8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op14M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op14M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    TRB16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, TRB16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op1CM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1CM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    TRB8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, TRB8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op1CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1CM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    TRB16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, TRB16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 /**********************************************************************************************/
 
 /* TSB *************************************************************************************** */
-static void Op04M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op04M1 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    TSB8 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, TSB8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op04M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op04M0 (void)
 {
-    long OpAddress = Direct (reg, icpu, cpu);
-    TSB16 (OpAddress, reg, icpu, cpu);
+    Direct (MODIFY, TSB16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op0CM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0CM1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    TSB8 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, TSB8);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
-static void Op0CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0CM0 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    TSB16 (OpAddress, reg, icpu, cpu);
+    Absolute (MODIFY, TSB16);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 /* memory */ + ONE_CYCLE /* opcode */;
+#endif
 }
 
 /**********************************************************************************************/
@@ -2456,46 +3314,46 @@ static void Op0CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUSta
 /* Branch Instructions *********************************************************************** */
 #ifndef SA1_OPCODES
 #define BranchCheck0()\
-    if( cpu->BranchSkip)\
+    if( CPU.BranchSkip)\
     {\
-	cpu->BranchSkip = FALSE;\
+	CPU.BranchSkip = FALSE;\
 	if (!Settings.SoundSkipMethod)\
-	    if( cpu->PC - cpu->PCBase > OpAddress)\
+	    if( CPU.PC - CPU.PCBase > OpAddress)\
 	        return;\
     }
 
 #define BranchCheck1()\
-    if( cpu->BranchSkip)\
+    if( CPU.BranchSkip)\
     {\
-	cpu->BranchSkip = FALSE;\
+	CPU.BranchSkip = FALSE;\
 	if (!Settings.SoundSkipMethod) {\
-	    if( cpu->PC - cpu->PCBase > OpAddress)\
+	    if( CPU.PC - CPU.PCBase > OpAddress)\
 	        return;\
 	} else \
 	if (Settings.SoundSkipMethod == 1)\
 	    return;\
 	if (Settings.SoundSkipMethod == 3)\
-	    if( cpu->PC - cpu->PCBase > OpAddress)\
+	    if( CPU.PC - CPU.PCBase > OpAddress)\
 	        return;\
 	    else\
-		cpu->PC = cpu->PCBase + OpAddress;\
+		CPU.PC = CPU.PCBase + OpAddress;\
     }
 
 #define BranchCheck2()\
-    if( cpu->BranchSkip)\
+    if( CPU.BranchSkip)\
     {\
-	cpu->BranchSkip = FALSE;\
+	CPU.BranchSkip = FALSE;\
 	if (!Settings.SoundSkipMethod) {\
-	    if( cpu->PC - cpu->PCBase > OpAddress)\
+	    if( CPU.PC - CPU.PCBase > OpAddress)\
 	        return;\
 	} else \
 	if (Settings.SoundSkipMethod == 1)\
-	    cpu->PC = cpu->PCBase + OpAddress;\
+	    CPU.PC = CPU.PCBase + OpAddress;\
 	if (Settings.SoundSkipMethod == 3)\
-	    if (cpu->PC - cpu->PCBase > OpAddress)\
+	    if (CPU.PC - CPU.PCBase > OpAddress)\
 	        return;\
 	    else\
-		cpu->PC = cpu->PCBase + OpAddress;\
+		CPU.PC = CPU.PCBase + OpAddress;\
     }
 #else
 #define BranchCheck0()
@@ -2505,48 +3363,48 @@ static void Op0CM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUSta
 
 #ifdef CPU_SHUTDOWN
 #ifndef SA1_OPCODES
-INLINE void CPUShutdown(struct SICPU * icpu, struct SCPUState * cpu)
+inline void CPUShutdown()
 {
-    if (Settings.Shutdown && cpu->PC == cpu->WaitAddress)
+    if (Settings.Shutdown && CPU.PC == CPU.WaitAddress)
     {
 	// Don't skip cycles with a pending NMI or IRQ - could cause delayed
 	// interrupt. Interrupts are delayed for a few cycles already, but
 	// the delay could allow the shutdown code to cycle skip again.
 	// Was causing screen flashing on Top Gear 3000.
 
-	if (cpu->WaitCounter == 0 && 
-	    !(cpu->Flags & (IRQ_PENDING_FLAG | NMI_FLAG)))
+	if (CPU.WaitCounter == 0 && 
+	    !(CPU.Flags & (IRQ_PENDING_FLAG | NMI_FLAG)))
 	{
-	    cpu->WaitAddress = NULL;
+	    CPU.WaitAddress = NULL;
 	    if (Settings.SA1)
 		S9xSA1ExecuteDuringSleep ();
-	    cpu->Cycles = cpu->NextEvent;
+	    CPU.Cycles = CPU.NextEvent;
 	    if (IAPU.APUExecuting)
 	    {
-		icpu->CPUExecuting = FALSE;
+		ICPU.CPUExecuting = FALSE;
 		do
 		{
 		    APU_EXECUTE1();
-		} while (APU.Cycles < cpu->NextEvent);
-		icpu->CPUExecuting = TRUE;
+		} while (APU.Cycles < CPU.NextEvent);
+		ICPU.CPUExecuting = TRUE;
 	    }
 	}
 	else
-	if (cpu->WaitCounter >= 2)
-	    cpu->WaitCounter = 1;
+	if (CPU.WaitCounter >= 2)
+	    CPU.WaitCounter = 1;
 	else
-	    cpu->WaitCounter--;
+	    CPU.WaitCounter--;
     }
 }
 #else
-INLINE void CPUShutdown(struct SICPU * icpu, struct SCPUState * cpu)
+inline void CPUShutdown()
 {
     if (Settings.Shutdown && CPU.PC == CPU.WaitAddress)
     {
 	if (CPU.WaitCounter >= 1)
 	{
 	    SA1.Executing = FALSE;
-	    SA1ICPU.CPUExecuting = FALSE;
+	    SA1.CPUExecuting = FALSE;
 	}
 	else
 	    CPU.WaitCounter++;
@@ -2558,913 +3416,1114 @@ INLINE void CPUShutdown(struct SICPU * icpu, struct SCPUState * cpu)
 #endif
 
 /* BCC */
-static void Op90 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op90 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck0 ();
-    if (!CHECKCARRY())
+    if (!CheckCarry ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BCS */
-static void OpB0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB0 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck0 ();
-    if (CHECKCARRY())
+    if (CheckCarry ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BEQ */
-static void OpF0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF0 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck2 ();
-    if (CHECKZERO())
+    if (CheckZero ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BMI */
-static void Op30 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op30 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck1 ();
-    if (CHECKNEGATIVE())
+    if (CheckNegative ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BNE */
-static void OpD0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD0 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck1 ();
-    if (!CHECKZERO())
+    if (!CheckZero ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
+	CPU.PC = CPU.PCBase + OpAddress;
 
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BPL */
-static void Op10 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op10 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck1 ();
-    if (!CHECKNEGATIVE())
+    if (!CheckNegative ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BRA */
-static void Op80 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op80 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
-    cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
-#else
+    Relative (JUMP, OpAddressPassthrough);
+    CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-    cpu->Cycles++;
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-    CPUShutdown (icpu, cpu);
+    CPUShutdown ();
 }
 
 /* BVC */
-static void Op50 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op50 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck0 ();
-    if (!CHECKOVERFLOW())
+    if (!CheckOverflow ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 
 /* BVS */
-static void Op70 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op70 (void)
 {
-    long OpAddress = Relative (reg, icpu, cpu);
+    Relative (JUMP, OpAddressPassthrough);
     BranchCheck0 ();
-    if (CHECKOVERFLOW())
+    if (CheckOverflow ())
     {
-	cpu->PC = cpu->PCBase + OpAddress;
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	CPU.PC = CPU.PCBase + OpAddress;
 #ifndef SA1_OPCODES
-	cpu->Cycles++;
+	CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-#endif
-	CPUShutdown (icpu, cpu);
+	CPUShutdown ();
     }
+#ifndef SA1_OPCODES
+    else
+    {
+        CPU.Cycles += CPU.MemSpeed;
+    }
+#endif
 }
 /**********************************************************************************************/
 
 /* ClearFlag Instructions ******************************************************************** */
 /* CLC */
-static void Op18 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op18 (void)
 {
-    CLEARCARRY ();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    ClearCarry ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
 /* CLD */
-static void OpD8 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD8 (void)
 {
-    CLEARDECIMAL_OP ();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    ClearDecimal ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
 /* CLI */
-static void Op58 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op58 (void)
 {
-    CLEARIRQ ();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    ClearIRQ ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-/*    CHECK_FOR_IRQ(reg, icpu, cpu); */
+/*    CHECK_FOR_IRQ(); */
 }
 
 /* CLV */
-static void OpB8 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpB8 (void)
 {
-    CLEAROVERFLOW();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    ClearOverflow ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 /**********************************************************************************************/
 
 /* DEX/DEY *********************************************************************************** */
-static void OpCAX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCAX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->XL--;
-    SETZN8 (reg->XL);
+    ICPU.Registers.XL--;
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void OpCAX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCAX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->X.W--;
-    SETZN16 (reg->X.W);
+    ICPU.Registers.X.W--;
+    SetZN16 (ICPU.Registers.X.W);
 }
 
-static void Op88X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op88X1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->YL--;
-    SETZN8 (reg->YL);
+    ICPU.Registers.YL--;
+    SetZN8 (ICPU.Registers.YL);
 }
 
-static void Op88X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op88X0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->Y.W--;
-    SETZN16 (reg->Y.W);
+    ICPU.Registers.Y.W--;
+    SetZN16 (ICPU.Registers.Y.W);
 }
 /**********************************************************************************************/
 
 /* INX/INY *********************************************************************************** */
-static void OpE8X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE8X1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->XL++;
-    SETZN8 (reg->XL);
+    ICPU.Registers.XL++;
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void OpE8X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE8X0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->X.W++;
-    SETZN16 (reg->X.W);
+    ICPU.Registers.X.W++;
+    SetZN16 (ICPU.Registers.X.W);
 }
 
-static void OpC8X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC8X1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->YL++;
-    SETZN8 (reg->YL);
+    ICPU.Registers.YL++;
+    SetZN8 (ICPU.Registers.YL);
 }
 
-static void OpC8X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC8X0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 #ifdef CPU_SHUTDOWN
-    cpu->WaitAddress = NULL;
+    CPU.WaitAddress = NULL;
 #endif
 
-    reg->Y.W++;
-    SETZN16 (reg->Y.W);
+    ICPU.Registers.Y.W++;
+    SetZN16 (ICPU.Registers.Y.W);
 }
 
 /**********************************************************************************************/
 
 /* NOP *************************************************************************************** */
-static void OpEA (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEA (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-
 }
 /**********************************************************************************************/
 
 /* PUSH Instructions ************************************************************************* */
-#define PUSHW_OP(w) \
-    S9xSetWord (w, reg->S.W - 1, cpu);\
-    reg->S.W -= 2;
-#define PUSHB_OP(b)\
-    S9xSetByte (b, reg->S.W--, cpu);
-#define PUSHW(w) \
-    S9xSetWord (w, Registers.S.W - 1, &CPU);\
-    Registers.S.W -= 2;
-#define PUSHB(b)\
-    S9xSetByte (b, Registers.S.W--, &CPU);
-/*
-#define PUSHW_OP(w) \
-    S9xSetWord (w, reg->S.W - 1, cpu);\
-    reg->S.W -= 2;
-#define PUSHB_OP(b)\
-    S9xSetByte (b, reg->S.W--, cpu);
-*/
-static void OpF4 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+/* #define PushW(w) \
+ *    S9xSetWord (w, ICPU.Registers.S.W - 1);\
+ *    ICPU.Registers.S.W -= 2;                 
+ */
+#define PushB(b)\
+    S9xSetByte (b, ICPU.Registers.S.W--);
+
+#define PushBE(b)\
+	S9xSetByte (b, ICPU.Registers.S.W--);\
+	ICPU.Registers.SH=0x01;
+
+
+#define PushW(w) \
+    S9xSetByte ((w)>>8, ICPU.Registers.S.W);\
+	S9xSetByte ((w)&0xff, (ICPU.Registers.S.W - 1)&0xFFFF);\
+    ICPU.Registers.S.W -= 2;
+
+#define PushWE(w) \
+    S9xSetByte ((w)>>8, ICPU.Registers.S.W--);\
+	ICPU.Registers.SH=0x01;\
+	S9xSetByte ((w)&0xff, (ICPU.Registers.S.W--)&0xFFFF);\
+    ICPU.Registers.SH = 0x01;
+
+#define PushWENew(w) \
+    S9xSetByte ((w)>>8, ICPU.Registers.S.W--);\
+	S9xSetByte ((w)&0xff, (ICPU.Registers.S.W--)&0xFFFF);\
+    ICPU.Registers.SH = 0x01;
+
+//PEA NL
+static void OpF4E1 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    PUSHW_OP (OpAddress);
+    Absolute (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
+    PushWENew ((unsigned short)OpAddress);
 }
 
-static void OpD4 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF4 (void)
 {
-    long OpAddress = DirectIndirect (reg, icpu, cpu);
-    PUSHW_OP (OpAddress);
+    Absolute (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
+    PushW ((unsigned short)OpAddress);
 }
 
-static void Op62 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PEI NL
+static void OpD4E1 (void)
 {
-    long OpAddress = RelativeLong (reg, icpu, cpu);
-    PUSHW_OP (OpAddress);
+    DirectIndirect (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
+    PushWENew ((unsigned short)OpAddress);
 }
 
-static void Op48M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpD4 (void)
 {
-    PUSHB_OP (reg->AL);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    DirectIndirect (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed;
+#endif
+    PushW ((unsigned short)OpAddress);
+}
+
+//PER NL
+static void Op62E1 (void)
+{
+    RelativeLong (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
+#endif
+    PushWENew ((unsigned short)OpAddress);
+}
+
+static void Op62 (void)
+{
+    RelativeLong (NONE, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
+#endif
+    PushW ((unsigned short)OpAddress);
+}
+
+
+//PHA
+static void Op48E1 (void)
+{
+    PushBE (ICPU.Registers.AL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op48M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op48M1 (void)
 {
-    PUSHW_OP (reg->A.W);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushB (ICPU.Registers.AL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op8B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op48M0 (void)
 {
-    PUSHB_OP (reg->DB);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushW (ICPU.Registers.A.W);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op0B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PHB
+static void Op8BE1 (void)
 {
-    PUSHW_OP (reg->D.W);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushBE (ICPU.Registers.DB);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+static void Op8B (void)
+{
+    PushB (ICPU.Registers.DB);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op4B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PHD NL
+static void Op0BE1 (void)
 {
-    PUSHB_OP (reg->PB);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushWENew (ICPU.Registers.D.W);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op08 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op0B (void)
 {
-    S9xPackStatus_OP ();
-    PUSHB_OP (reg->PL);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushW (ICPU.Registers.D.W);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void OpDAX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PHK
+static void Op4BE1 (void)
 {
-    PUSHB_OP (reg->XL);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushBE (ICPU.Registers.PB);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void OpDAX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4B (void)
 {
-    PUSHW_OP (reg->X.W);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    PushB (ICPU.Registers.PB);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op5AX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PHP
+static void Op08E1 (void)
 {
-    PUSHB_OP (reg->YL);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    S9xPackStatus ();
+    PushBE (ICPU.Registers.PL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
-static void Op5AX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op08 (void)
 {
-    PUSHW_OP (reg->Y.W);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    S9xPackStatus ();
+    PushB (ICPU.Registers.PL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+//PHX
+static void OpDAE1 (void)
+{
+    PushBE (ICPU.Registers.XL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+static void OpDAX1 (void)
+{
+    PushB (ICPU.Registers.XL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+static void OpDAX0 (void)
+{
+    PushW (ICPU.Registers.X.W);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+//PHY
+static void Op5AE1 (void)
+{
+    PushBE (ICPU.Registers.YL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+static void Op5AX1 (void)
+{
+    PushB (ICPU.Registers.YL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
+#endif
+}
+
+static void Op5AX0 (void)
+{
+    PushW (ICPU.Registers.Y.W);
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 /**********************************************************************************************/
 
 /* PULL Instructions ************************************************************************* */
 #define PullW(w) \
-	w = S9xGetWord (reg->S.W + 1, cpu); \
-	reg->S.W += 2;
+	w = S9xGetByte (++ICPU.Registers.S.W); \
+	w |= (S9xGetByte (++ICPU.Registers.S.W)<<8);
+
+/*	w = S9xGetWord (ICPU.Registers.S.W + 1); \
+	ICPU.Registers.S.W += 2;
+*/
 
 #define PullB(b)\
-	b = S9xGetByte (++reg->S.W, cpu);
+	b = S9xGetByte (++ICPU.Registers.S.W);
 
-static void Op68M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+#define PullBE(b)\
+	ICPU.Registers.S.W++;\
+	ICPU.Registers.SH=0x01;\
+	b = S9xGetByte (ICPU.Registers.S.W);
+
+#define PullWE(w) \
+	ICPU.Registers.S.W++;\
+	ICPU.Registers.SH=0x01;\
+	w = S9xGetByte (ICPU.Registers.S.W); \
+	ICPU.Registers.S.W++; \
+	ICPU.Registers.SH=0x01;\
+	w |= (S9xGetByte (ICPU.Registers.S.W)<<8);
+
+#define PullWENew(w) \
+	PullW(w);\
+	ICPU.Registers.SH=0x01;	
+
+//PLA
+static void Op68E1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullB (reg->AL);
-    SETZN8 (reg->AL);
+    PullBE (ICPU.Registers.AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op68M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op68M1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullW (reg->A.W);
-    SETZN16 (reg->A.W);
+    PullB (ICPU.Registers.AL);
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void OpAB (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op68M0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullB (reg->DB);
-    SETZN8 (reg->DB);
-    icpu->ShiftedDB = (reg->DB & 0xff) << 16;
+    PullW (ICPU.Registers.A.W);
+    SetZN16 (ICPU.Registers.A.W);
+}
+
+//PLB
+static void OpABE1 (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullBE (ICPU.Registers.DB);
+    SetZN8 (ICPU.Registers.DB);
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+}
+
+static void OpAB (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullB (ICPU.Registers.DB);
+    SetZN8 (ICPU.Registers.DB);
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
 }
 
 /* PHP */
-static void Op2B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PLD NL
+static void Op2BE1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullW (reg->D.W);
-    SETZN16 (reg->D.W);
+    PullWENew (ICPU.Registers.D.W);
+    SetZN16 (ICPU.Registers.D.W);
+}
+
+static void Op2B (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullW (ICPU.Registers.D.W);
+    SetZN16 (ICPU.Registers.D.W);
 }
 
 /* PLP */
-static void Op28 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op28E1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullB (reg->PL);
-    S9xUnpackStatus_OP ();
+    PullBE (ICPU.Registers.PL);
+    S9xUnpackStatus ();
 
-    if (CHECKINDEX())
+    if (CheckIndex ())
     {
-	reg->XH = 0;
-	reg->YH = 0;
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
     }
-    S9xFixCycles(reg, icpu);
-/*     CHECK_FOR_IRQ(reg, icpu, cpu);*/
+    S9xFixCycles();
+/*     CHECK_FOR_IRQ();*/
 }
 
-static void OpFAX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op28 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullB (reg->XL);
-    SETZN8 (reg->XL);
+    PullB (ICPU.Registers.PL);
+    S9xUnpackStatus ();
+
+    if (CheckIndex ())
+    {
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
+    }
+    S9xFixCycles();
+/*     CHECK_FOR_IRQ();*/
 }
 
-static void OpFAX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//PLX
+static void OpFAE1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullW (reg->X.W);
-    SETZN16 (reg->X.W);
+    PullBE (ICPU.Registers.XL);
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void Op7AX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFAX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullB (reg->YL);
-    SETZN8 (reg->YL);
+    PullB (ICPU.Registers.XL);
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void Op7AX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFAX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    PullW (reg->Y.W);
-    SETZN16 (reg->Y.W);
+    PullW (ICPU.Registers.X.W);
+    SetZN16 (ICPU.Registers.X.W);
+}
+
+//PLY
+static void Op7AE1 (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullBE (ICPU.Registers.YL);
+    SetZN8 (ICPU.Registers.YL);
+}
+
+static void Op7AX1 (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullB (ICPU.Registers.YL);
+    SetZN8 (ICPU.Registers.YL);
+}
+
+static void Op7AX0 (void)
+{
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+    PullW (ICPU.Registers.Y.W);
+    SetZN16 (ICPU.Registers.Y.W);
 }
 
 /**********************************************************************************************/
 
 /* SetFlag Instructions ********************************************************************** */
 /* SEC */
-static void Op38 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op38 (void)
 {
-    SETCARRY();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    SetCarry ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 
 /* SED */
-static void OpF8 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpF8 (void)
 {
-    SETDECIMAL();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    SetDecimal ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
     missing.decimal_mode = 1;
 }
 
 /* SEI */
-static void Op78 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op78 (void)
 {
-    SETIRQ_OP ();
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    SetIRQ ();
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 }
 /**********************************************************************************************/
 
 /* Transfer Instructions ********************************************************************* */
 /* TAX8 */
-static void OpAAX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAAX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->XL = reg->AL;
-    SETZN8 (reg->XL);
+    ICPU.Registers.XL = ICPU.Registers.AL;
+    SetZN8 (ICPU.Registers.XL);
 }
 
 /* TAX16 */
-static void OpAAX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpAAX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->X.W = reg->A.W;
-    SETZN16 (reg->X.W);
+    ICPU.Registers.X.W = ICPU.Registers.A.W;
+    SetZN16 (ICPU.Registers.X.W);
 }
 
 /* TAY8 */
-static void OpA8X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA8X1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->YL = reg->AL;
-    SETZN8 (reg->YL);
+    ICPU.Registers.YL = ICPU.Registers.AL;
+    SetZN8 (ICPU.Registers.YL);
 }
 
 /* TAY16 */
-static void OpA8X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpA8X0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->Y.W = reg->A.W;
-    SETZN16 (reg->Y.W);
+    ICPU.Registers.Y.W = ICPU.Registers.A.W;
+    SetZN16 (ICPU.Registers.Y.W);
 }
 
-static void Op5B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5B (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->D.W = reg->A.W;
-    SETZN16 (reg->D.W);
+    ICPU.Registers.D.W = ICPU.Registers.A.W;
+    SetZN16 (ICPU.Registers.D.W);
 }
 
-static void Op1B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op1B (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->S.W = reg->A.W;
-    if (CHECKEMULATION_OP())
-	reg->SH = 1;
+    ICPU.Registers.S.W = ICPU.Registers.A.W;
+    if (CheckEmulation())
+	ICPU.Registers.SH = 1;
 }
 
-static void Op7B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7B (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->A.W = reg->D.W;
-    SETZN16 (reg->A.W);
+    ICPU.Registers.A.W = ICPU.Registers.D.W;
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void Op3B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op3B (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->A.W = reg->S.W;
-    SETZN16 (reg->A.W);
+    ICPU.Registers.A.W = ICPU.Registers.S.W;
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void OpBAX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBAX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->XL = reg->SL;
-    SETZN8 (reg->XL);
+    ICPU.Registers.XL = ICPU.Registers.SL;
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void OpBAX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBAX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->X.W = reg->S.W;
-    SETZN16 (reg->X.W);
+    ICPU.Registers.X.W = ICPU.Registers.S.W;
+    SetZN16 (ICPU.Registers.X.W);
 }
 
-static void Op8AM1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8AM1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->AL = reg->XL;
-    SETZN8 (reg->AL);
+    ICPU.Registers.AL = ICPU.Registers.XL;
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op8AM0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op8AM0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->A.W = reg->X.W;
-    SETZN16 (reg->A.W);
+    ICPU.Registers.A.W = ICPU.Registers.X.W;
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void Op9A (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9A (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->S.W = reg->X.W;
-    if (CHECKEMULATION_OP())
-	reg->SH = 1;
+    ICPU.Registers.S.W = ICPU.Registers.X.W;
+    if (CheckEmulation())
+	ICPU.Registers.SH = 1;
 }
 
-static void Op9BX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9BX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->YL = reg->XL;
-    SETZN8 (reg->YL);
+    ICPU.Registers.YL = ICPU.Registers.XL;
+    SetZN8 (ICPU.Registers.YL);
 }
 
-static void Op9BX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op9BX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->Y.W = reg->X.W;
-    SETZN16 (reg->Y.W);
+    ICPU.Registers.Y.W = ICPU.Registers.X.W;
+    SetZN16 (ICPU.Registers.Y.W);
 }
 
-static void Op98M1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op98M1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->AL = reg->YL;
-    SETZN8 (reg->AL);
+    ICPU.Registers.AL = ICPU.Registers.YL;
+    SetZN8 (ICPU.Registers.AL);
 }
 
-static void Op98M0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op98M0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->A.W = reg->Y.W;
-    SETZN16 (reg->A.W);
+    ICPU.Registers.A.W = ICPU.Registers.Y.W;
+    SetZN16 (ICPU.Registers.A.W);
 }
 
-static void OpBBX1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBBX1 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->XL = reg->YL;
-    SETZN8 (reg->XL);
+    ICPU.Registers.XL = ICPU.Registers.YL;
+    SetZN8 (ICPU.Registers.XL);
 }
 
-static void OpBBX0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpBBX0 (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
-    reg->X.W = reg->Y.W;
-    SETZN16 (reg->X.W);
+    ICPU.Registers.X.W = ICPU.Registers.Y.W;
+    SetZN16 (ICPU.Registers.X.W);
 }
 
 /**********************************************************************************************/
 
 /* XCE *************************************************************************************** */
-static void OpFB (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFB (void)
 {
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE;
 #endif
 
-    uint8 A1 = (icpu->_Carry & 0xff);
-    uint8 A2 = reg->PH;
-    icpu->_Carry = A2 & 1;
-    reg->PH = A1;
+    uint8 A1 = ICPU._Carry;
+    uint8 A2 = ICPU.Registers.PH;
+    ICPU._Carry = A2 & 1;
+    ICPU.Registers.PH = A1;
 
-    if (CHECKEMULATION_OP())
+    if (CheckEmulation())
     {
-	SETFLAGS_OP(MemoryFlag | IndexFlag);
-	reg->SH = 1;
+	SetFlags (MemoryFlag | IndexFlag);
+	ICPU.Registers.SH = 1;
 	missing.emulate6502 = 1;
     }
-    if (CHECKINDEX ())
+    if (CheckIndex ())
     {
-	reg->XH = 0;
-	reg->YH = 0;
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
     }
-    S9xFixCycles(reg, icpu);
+    S9xFixCycles();
 }
 /**********************************************************************************************/
 
 /* BRK *************************************************************************************** */
-static void Op00 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op00 (void)
 {
 #ifdef DEBUGGER
-    if (cpu->Flags & TRACE_FLAG)
+    if (CPU.Flags & TRACE_FLAG)
 	S9xTraceMessage ("*** BRK");
 #endif
 
 #ifndef SA1_OPCODES
-    cpu->BRKTriggered = TRUE;
+    CPU.BRKTriggered = TRUE;
 #endif
 
-    if (!CHECKEMULATION_OP())
+    if (!CheckEmulation())
     {
-	PUSHB_OP (reg->PB);
-	PUSHW_OP (cpu->PC - cpu->PCBase + 1);
-	S9xPackStatus_OP ();
-	PUSHB_OP (reg->PL);
-	CLEARDECIMAL_OP ();
-	SETIRQ_OP ();
+	PushB (ICPU.Registers.PB);
+	PushW (CPU.PC - CPU.PCBase + 1);
+	S9xPackStatus ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	reg->PB = 0;
-	icpu->ShiftedPB = 0;
-	S9xSetPCBase (S9xGetWord (0xFFE6, cpu), cpu);
-#ifdef VAR_CYCLES
-        cpu->Cycles += TWO_CYCLES;
-#else
+	ICPU.Registers.PB = 0;
+	ICPU.ShiftedPB = 0;
+	S9xSetPCBase (S9xGetWord (0xFFE6));
 #ifndef SA1_OPCODES
-	cpu->Cycles += 8;
-#endif
+        CPU.Cycles += TWO_CYCLES;
 #endif
     }
     else
     {
-	PUSHW_OP (cpu->PC - cpu->PCBase);
-	S9xPackStatus_OP ();
-	PUSHB_OP (reg->PL);
-	CLEARDECIMAL_OP ();
-	SETIRQ_OP ();
+	PushW (CPU.PC - CPU.PCBase);
+	S9xPackStatus ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	reg->PB = 0;
-	icpu->ShiftedPB = 0;
-	S9xSetPCBase (S9xGetWord (0xFFFE, cpu), cpu);
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	ICPU.Registers.PB = 0;
+	ICPU.ShiftedPB = 0;
+	S9xSetPCBase (S9xGetWord (0xFFFE));
 #ifndef SA1_OPCODES
-	cpu->Cycles += 6;
-#endif
+	CPU.Cycles += ONE_CYCLE;
 #endif
     }
 }
 /**********************************************************************************************/
 
 /* BRL ************************************************************************************** */
-static void Op82 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op82 (void)
 {
-    long OpAddress = RelativeLong (reg, icpu, cpu);
-    S9xSetPCBase (icpu->ShiftedPB + OpAddress, cpu);
+    RelativeLong (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
+#endif
+    S9xSetPCBase (ICPU.ShiftedPB + OpAddress);
 }
 /**********************************************************************************************/
 
 /* IRQ *************************************************************************************** */
-void S9xOpcode_IRQ ()
+void S9xOpcode_IRQ (void)
 {
 #ifdef DEBUGGER
     if (CPU.Flags & TRACE_FLAG)
 	S9xTraceMessage ("*** IRQ");
 #endif
-    if (!CHECKEMULATION())
+    if (!CheckEmulation())
     {
-	PUSHB (Registers.PB);
-	PUSHW (CPU.PC - CPU.PCBase);
+	PushB (ICPU.Registers.PB);
+	PushW (CPU.PC - CPU.PCBase);
 	S9xPackStatus ();
-	PUSHB (Registers.PL);
-	CLEARDECIMAL ();
-	SETIRQ ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	Registers.PB = 0;
+	ICPU.Registers.PB = 0;
 	ICPU.ShiftedPB = 0;
 #ifdef SA1_OPCODES
 	S9xSA1SetPCBase (Memory.FillRAM [0x2207] |
-			 (Memory.FillRAM [0x2208] << 8), &SA1);
+			 (Memory.FillRAM [0x2208] << 8));
 #else
 	if (Settings.SA1 && (Memory.FillRAM [0x2209] & 0x40))
 	    S9xSetPCBase (Memory.FillRAM [0x220e] | 
-			  (Memory.FillRAM [0x220f] << 8), &CPU);
+			  (Memory.FillRAM [0x220f] << 8));
 	else
-	    S9xSetPCBase (S9xGetWord (0xFFEE, &CPU), &CPU);
-#endif
-#ifdef VAR_CYCLES
+	    S9xSetPCBase (S9xGetWord (0xFFEE));
         CPU.Cycles += TWO_CYCLES;
-#else
-#ifndef SA1_OPCODES
-	CPU.Cycles += 8;
-#endif
 #endif
     }
     else
     {
-	PUSHW (CPU.PC - CPU.PCBase);
+	PushW (CPU.PC - CPU.PCBase);
 	S9xPackStatus ();
-	PUSHB (Registers.PL);
-	CLEARDECIMAL ();
-	SETIRQ ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	Registers.PB = 0;
+	ICPU.Registers.PB = 0;
 	ICPU.ShiftedPB = 0;
 #ifdef SA1_OPCODES
 	S9xSA1SetPCBase (Memory.FillRAM [0x2207] |
-			 (Memory.FillRAM [0x2208] << 8), &SA1);
+			 (Memory.FillRAM [0x2208] << 8));
 #else
 	if (Settings.SA1 && (Memory.FillRAM [0x2209] & 0x40))
 	    S9xSetPCBase (Memory.FillRAM [0x220e] | 
-			  (Memory.FillRAM [0x220f] << 8), &CPU);
+			  (Memory.FillRAM [0x220f] << 8));
 	else
-	    S9xSetPCBase (S9xGetWord (0xFFFE, &CPU), &CPU);
-#endif
-#ifdef VAR_CYCLES
+	    S9xSetPCBase (S9xGetWord (0xFFFE));
 	CPU.Cycles += ONE_CYCLE;
-#else
-#ifndef SA1_OPCODES
-	CPU.Cycles += 6;
-#endif
 #endif
     }
 }
@@ -3472,470 +4531,518 @@ void S9xOpcode_IRQ ()
 /**********************************************************************************************/
 
 /* NMI *************************************************************************************** */
-void S9xOpcode_NMI ()
+void S9xOpcode_NMI (void)
 {
 #ifdef DEBUGGER
     if (CPU.Flags & TRACE_FLAG)
 	S9xTraceMessage ("*** NMI");
 #endif
-    if (!CHECKEMULATION())
+    if (!CheckEmulation())
     {
-	PUSHB (Registers.PB);
-	PUSHW (CPU.PC - CPU.PCBase);
+	PushB (ICPU.Registers.PB);
+	PushW (CPU.PC - CPU.PCBase);
 	S9xPackStatus ();
-	PUSHB (Registers.PL);
-	CLEARDECIMAL ();
-	SETIRQ ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	Registers.PB = 0;
+	ICPU.Registers.PB = 0;
 	ICPU.ShiftedPB = 0;
 #ifdef SA1_OPCODES
 	S9xSA1SetPCBase (Memory.FillRAM [0x2205] |
-			 (Memory.FillRAM [0x2206] << 8), &SA1);
+			 (Memory.FillRAM [0x2206] << 8));
 #else
 	if (Settings.SA1 && (Memory.FillRAM [0x2209] & 0x20))
 	    S9xSetPCBase (Memory.FillRAM [0x220c] |
-			  (Memory.FillRAM [0x220d] << 8), &CPU);
+			  (Memory.FillRAM [0x220d] << 8));
 	else
-	    S9xSetPCBase (S9xGetWord (0xFFEA, &CPU), &CPU);
-#endif
-#ifdef VAR_CYCLES
+	    S9xSetPCBase (S9xGetWord (0xFFEA));
 	CPU.Cycles += TWO_CYCLES;
-#else
-#ifndef SA1_OPCODES
-	CPU.Cycles += 8;
-#endif
 #endif
     }
     else
     {
-	PUSHW (CPU.PC - CPU.PCBase);
+	PushW (CPU.PC - CPU.PCBase);
 	S9xPackStatus ();
-	PUSHB (Registers.PL);
-	CLEARDECIMAL ();
-	SETIRQ ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	Registers.PB = 0;
+	ICPU.Registers.PB = 0;
 	ICPU.ShiftedPB = 0;
 #ifdef SA1_OPCODES
 	S9xSA1SetPCBase (Memory.FillRAM [0x2205] |
-			 (Memory.FillRAM [0x2206] << 8), &SA1);
+			 (Memory.FillRAM [0x2206] << 8));
 #else
 	if (Settings.SA1 && (Memory.FillRAM [0x2209] & 0x20))
 	    S9xSetPCBase (Memory.FillRAM [0x220c] |
-			  (Memory.FillRAM [0x220d] << 8), &CPU);
+			  (Memory.FillRAM [0x220d] << 8));
 	else
-	    S9xSetPCBase (S9xGetWord (0xFFFA, &CPU), &CPU);
-#endif
-#ifdef VAR_CYCLES
+	    S9xSetPCBase (S9xGetWord (0xFFFA));
 	CPU.Cycles += ONE_CYCLE;
-#else
-#ifndef SA1_OPCODES
-	CPU.Cycles += 6;
-#endif
 #endif
     }
 }
 /**********************************************************************************************/
 
 /* COP *************************************************************************************** */
-static void Op02 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op02 (void)
 {
 #ifdef DEBUGGER
-    if (cpu->Flags & TRACE_FLAG)
+    if (CPU.Flags & TRACE_FLAG)
 	S9xTraceMessage ("*** COP");
 #endif	
-    if (!CHECKEMULATION_OP())
+    if (!CheckEmulation())
     {
-	PUSHB_OP (reg->PB);
-	PUSHW_OP (cpu->PC - cpu->PCBase + 1);
-	S9xPackStatus_OP ();
-	PUSHB_OP (reg->PL);
-	CLEARDECIMAL_OP ();
-	SETIRQ_OP ();
+	PushB (ICPU.Registers.PB);
+	PushW (CPU.PC - CPU.PCBase + 1);
+	S9xPackStatus ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	reg->PB = 0;
-	icpu->ShiftedPB = 0;
-	S9xSetPCBase (S9xGetWord (0xFFE4, cpu), cpu);
-#ifdef VAR_CYCLES
-        cpu->Cycles += TWO_CYCLES;
-#else
+	ICPU.Registers.PB = 0;
+	ICPU.ShiftedPB = 0;
+	S9xSetPCBase (S9xGetWord (0xFFE4));
 #ifndef SA1_OPCODES
-	cpu->Cycles += 8;
-#endif
+        CPU.Cycles += TWO_CYCLES;
 #endif
     }
     else
     {
-	PUSHW_OP (cpu->PC - cpu->PCBase);
-	S9xPackStatus_OP ();
-	PUSHB_OP (reg->PL);
-	CLEARDECIMAL_OP ();
-	SETIRQ_OP ();
+	PushW (CPU.PC - CPU.PCBase);
+	S9xPackStatus ();
+	PushB (ICPU.Registers.PL);
+	OpenBus = ICPU.Registers.PL;
+	ClearDecimal ();
+	SetIRQ ();
 
-	reg->PB = 0;
-	icpu->ShiftedPB = 0;
-	S9xSetPCBase (S9xGetWord (0xFFF4, cpu), cpu);
-#ifdef VAR_CYCLES
-	cpu->Cycles += ONE_CYCLE;
-#else
+	ICPU.Registers.PB = 0;
+	ICPU.ShiftedPB = 0;
+	S9xSetPCBase (S9xGetWord (0xFFF4));
 #ifndef SA1_OPCODES
-	cpu->Cycles += 6;
-#endif
+	CPU.Cycles += ONE_CYCLE;
 #endif
     }
 }
 /**********************************************************************************************/
 
 /* JML *************************************************************************************** */
-static void OpDC (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDC (void)
 {
-    long OpAddress = AbsoluteIndirectLong (reg, icpu, cpu);
-    reg->PB = (uint8) (OpAddress >> 16);
-    icpu->ShiftedPB = OpAddress & 0xff0000;
-    S9xSetPCBase (OpAddress, cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+    AbsoluteIndirectLong (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + TWO_CYCLES;
 #endif
+    ICPU.Registers.PB = (uint8) (OpAddress >> 16);
+    ICPU.ShiftedPB = OpAddress & 0xff0000;
+    S9xSetPCBase (OpAddress);
 }
 
-static void Op5C (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op5C (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    reg->PB = (uint8) (OpAddress >> 16);
-    icpu->ShiftedPB = OpAddress & 0xff0000;
-    S9xSetPCBase (OpAddress, cpu);
+    AbsoluteLong (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+    ICPU.Registers.PB = (uint8) (OpAddress >> 16);
+    ICPU.ShiftedPB = OpAddress & 0xff0000;
+    S9xSetPCBase (OpAddress);
 }
 /**********************************************************************************************/
 
 /* JMP *************************************************************************************** */
-static void Op4C (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op4C (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    S9xSetPCBase (icpu->ShiftedPB + (OpAddress & 0xffff), cpu);
+    Absolute (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
+    S9xSetPCBase (ICPU.ShiftedPB + (OpAddress & 0xffff));
 #if defined(CPU_SHUTDOWN) && defined(SA1_OPCODES)
-    CPUShutdown (icpu, cpu);
+    CPUShutdown ();
 #endif
 }
 
-static void Op6C (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op6C (void)
 {
-    long OpAddress = AbsoluteIndirect (reg, icpu, cpu);
-    S9xSetPCBase (icpu->ShiftedPB + (OpAddress & 0xffff), cpu);
+    AbsoluteIndirect (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2;
+#endif
+    S9xSetPCBase (ICPU.ShiftedPB + (OpAddress & 0xffff));
 }
 
-static void Op7C (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op7C (void)
 {
-    long OpAddress = AbsoluteIndexedIndirect (reg, icpu, cpu);
-    S9xSetPCBase (icpu->ShiftedPB + OpAddress, cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    AbsoluteIndexedIndirect (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
 #endif
+    S9xSetPCBase (ICPU.ShiftedPB + OpAddress);
 }
 /**********************************************************************************************/
 
 /* JSL/RTL *********************************************************************************** */
-static void Op22 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op22E1 (void)
 {
-    long OpAddress = AbsoluteLong (reg, icpu, cpu);
-    PUSHB_OP (reg->PB);
-    PUSHW_OP (cpu->PC - cpu->PCBase - 1);
-    reg->PB = (uint8) (OpAddress >> 16);
-    icpu->ShiftedPB = OpAddress & 0xff0000;
-    S9xSetPCBase (OpAddress, cpu);
+    AbsoluteLong (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+    PushB (ICPU.Registers.PB);
+    PushWENew (CPU.PC - CPU.PCBase - 1);
+    ICPU.Registers.PB = (uint8) (OpAddress >> 16);
+    ICPU.ShiftedPB = OpAddress & 0xff0000;
+    S9xSetPCBase (OpAddress);
 }
 
-static void Op6B (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op22 (void)
 {
-    PullW (reg->PC);
-    PullB (reg->PB);
-    icpu->ShiftedPB = (reg->PB & 0xff) << 16;
-    S9xSetPCBase (icpu->ShiftedPB + ((reg->PC + 1) & 0xffff), cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+    AbsoluteLong (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + CPU.MemSpeed;
+#endif
+    PushB (ICPU.Registers.PB);
+    PushW (CPU.PC - CPU.PCBase - 1);
+    ICPU.Registers.PB = (uint8) (OpAddress >> 16);
+    ICPU.ShiftedPB = OpAddress & 0xff0000;
+    S9xSetPCBase (OpAddress);
+}
+
+static void Op6BE1 (void)
+{
+    PullWENew (ICPU.Registers.PC);
+    PullB (ICPU.Registers.PB);
+    ICPU.ShiftedPB = ICPU.Registers.PB << 16;
+    S9xSetPCBase (ICPU.ShiftedPB + ((ICPU.Registers.PC + 1) & 0xffff));
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
+#endif
+}
+
+static void Op6B (void)
+{
+    PullW (ICPU.Registers.PC);
+    PullB (ICPU.Registers.PB);
+    ICPU.ShiftedPB = ICPU.Registers.PB << 16;
+    S9xSetPCBase (ICPU.ShiftedPB + ((ICPU.Registers.PC + 1) & 0xffff));
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
 }
 /**********************************************************************************************/
 
 /* JSR/RTS *********************************************************************************** */
-static void Op20 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op20 (void)
 {
-    long OpAddress = Absolute (reg, icpu, cpu);
-    PUSHW_OP (cpu->PC - cpu->PCBase - 1);
-    S9xSetPCBase (icpu->ShiftedPB + (OpAddress & 0xffff), cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    Absolute (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
 #endif
+    PushW (CPU.PC - CPU.PCBase - 1);
+    S9xSetPCBase (ICPU.ShiftedPB + (OpAddress & 0xffff));
 }
 
-static void OpFC (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+//JSR a,x
+static void OpFCE1 (void)
 {
-    long OpAddress = AbsoluteIndexedIndirect (reg, icpu, cpu);
-    PUSHW_OP (cpu->PC - cpu->PCBase - 1);
-    S9xSetPCBase (icpu->ShiftedPB + OpAddress, cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE;
+    AbsoluteIndexedIndirect (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
 #endif
+    PushWENew (CPU.PC - CPU.PCBase - 1);
+    S9xSetPCBase (ICPU.ShiftedPB + OpAddress);
 }
 
-static void Op60 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpFC (void)
 {
-    PullW (reg->PC);
-    S9xSetPCBase (icpu->ShiftedPB + ((reg->PC + 1) & 0xffff), cpu);
-#ifdef VAR_CYCLES
-    cpu->Cycles += ONE_CYCLE * 3;
+    AbsoluteIndexedIndirect (JUMP, OpAddressPassthrough);
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + ONE_CYCLE;
+#endif
+    PushW (CPU.PC - CPU.PCBase - 1);
+    S9xSetPCBase (ICPU.ShiftedPB + OpAddress);
+}
+
+static void Op60 (void)
+{
+    PullW (ICPU.Registers.PC);
+    S9xSetPCBase (ICPU.ShiftedPB + ((ICPU.Registers.PC + 1) & 0xffff));
+#ifndef SA1_OPCODES
+    CPU.Cycles += ONE_CYCLE * 3;
 #endif
 }
 
 /**********************************************************************************************/
 
 /* MVN/MVP *********************************************************************************** */
-static void Op54X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op54X1 (void)
 {
     uint32 SrcBank;
 
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2 + TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + TWO_CYCLES;
 #endif
     
-    reg->DB = *cpu->PC++;
-    icpu->ShiftedDB = (reg->DB & 0xff) << 16;
-    SrcBank = *cpu->PC++;
+    ICPU.Registers.DB = *CPU.PC++;
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+    OpenBus = SrcBank = *CPU.PC++;
 
-    S9xSetByte (S9xGetByte ((SrcBank << 16) + reg->X.W, cpu), 
-	     icpu->ShiftedDB + reg->Y.W, cpu);
+    S9xSetByte (S9xGetByte ((SrcBank << 16) + ICPU.Registers.X.W), 
+	     ICPU.ShiftedDB + ICPU.Registers.Y.W);
 
-    reg->XL++;
-    reg->YL++;
-    reg->A.W--;
-    if (reg->A.W != 0xffff)
-	cpu->PC -= 3;
+    ICPU.Registers.XL++;
+    ICPU.Registers.YL++;
+    ICPU.Registers.A.W--;
+    if (ICPU.Registers.A.W != 0xffff)
+	CPU.PC -= 3;
 }
 
-static void Op54X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op54X0 (void)
 {
     uint32 SrcBank;
 
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2 + TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + TWO_CYCLES;
 #endif
     
-    reg->DB = *cpu->PC++;
-    icpu->ShiftedDB = (reg->DB & 0xff) << 16;
-    SrcBank = *cpu->PC++;
+    ICPU.Registers.DB = *CPU.PC++;
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+    OpenBus = SrcBank = *CPU.PC++;
 
-    S9xSetByte (S9xGetByte ((SrcBank << 16) + reg->X.W, cpu), 
-	     icpu->ShiftedDB + reg->Y.W, cpu);
+    S9xSetByte (S9xGetByte ((SrcBank << 16) + ICPU.Registers.X.W), 
+	     ICPU.ShiftedDB + ICPU.Registers.Y.W);
 
-    reg->X.W++;
-    reg->Y.W++;
-    reg->A.W--;
-    if (reg->A.W != 0xffff)
-	cpu->PC -= 3;
+    ICPU.Registers.X.W++;
+    ICPU.Registers.Y.W++;
+    ICPU.Registers.A.W--;
+    if (ICPU.Registers.A.W != 0xffff)
+	CPU.PC -= 3;
 }
 
-static void Op44X1 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op44X1 (void)
 {
     uint32 SrcBank;
 
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2 + TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + TWO_CYCLES;
 #endif    
-    reg->DB = *cpu->PC++;
-    icpu->ShiftedDB = (reg->DB & 0xff) << 16;
-    SrcBank = *cpu->PC++;
-    S9xSetByte (S9xGetByte ((SrcBank << 16) + reg->X.W, cpu), 
-	     icpu->ShiftedDB + reg->Y.W, cpu);
+    ICPU.Registers.DB = *CPU.PC++;
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+    OpenBus = SrcBank = *CPU.PC++;
+    S9xSetByte (S9xGetByte ((SrcBank << 16) + ICPU.Registers.X.W), 
+	     ICPU.ShiftedDB + ICPU.Registers.Y.W);
 
-    reg->XL--;
-    reg->YL--;
-    reg->A.W--;
-    if (reg->A.W != 0xffff)
-	cpu->PC -= 3;
+    ICPU.Registers.XL--;
+    ICPU.Registers.YL--;
+    ICPU.Registers.A.W--;
+    if (ICPU.Registers.A.W != 0xffff)
+	CPU.PC -= 3;
 }
 
-static void Op44X0 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op44X0 (void)
 {
     uint32 SrcBank;
 
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeedx2 + TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeedx2 + TWO_CYCLES;
 #endif    
-    reg->DB = *cpu->PC++;
-    icpu->ShiftedDB = (reg->DB & 0xff) << 16;
-    SrcBank = *cpu->PC++;
-    S9xSetByte (S9xGetByte ((SrcBank << 16) + reg->X.W, cpu), 
-	     icpu->ShiftedDB + reg->Y.W, cpu);
+    ICPU.Registers.DB = *CPU.PC++;
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+    OpenBus = SrcBank = *CPU.PC++;
+    S9xSetByte (S9xGetByte ((SrcBank << 16) + ICPU.Registers.X.W), 
+	     ICPU.ShiftedDB + ICPU.Registers.Y.W);
 
-    reg->X.W--;
-    reg->Y.W--;
-    reg->A.W--;
-    if (reg->A.W != 0xffff)
-	cpu->PC -= 3;
+    ICPU.Registers.X.W--;
+    ICPU.Registers.Y.W--;
+    ICPU.Registers.A.W--;
+    if (ICPU.Registers.A.W != 0xffff)
+	CPU.PC -= 3;
 }
 
 /**********************************************************************************************/
 
 /* REP/SEP *********************************************************************************** */
-static void OpC2 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpC2 (void)
 {
-    uint8 Work8 = ~*cpu->PC++;
-    reg->PL &= Work8;
-    icpu->_Carry &= Work8;
-    icpu->_Overflow &= (Work8 >> 6);
-    icpu->_Negative &= Work8;
-    icpu->_Zero |= ~Work8 & Zero;
+    uint8 Work8 = ~*CPU.PC++;
+    ICPU.Registers.PL &= Work8;
+    ICPU._Carry &= Work8;
+    ICPU._Overflow &= (Work8 >> 6);
+    ICPU._Negative &= Work8;
+    ICPU._Zero |= ~Work8 & Zero;
 
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed + ONE_CYCLE;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-    if (CHECKEMULATION_OP())
+    if (CheckEmulation())
     {
-	SETFLAGS_OP(MemoryFlag | IndexFlag);
+	SetFlags (MemoryFlag | IndexFlag);
 	missing.emulate6502 = 1;
     }
-    if (CHECKINDEX ())
+    if (CheckIndex ())
     {
-	reg->XH = 0;
-	reg->YH = 0;
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
     }
-    S9xFixCycles(reg, icpu);
-/*    CHECK_FOR_IRQ(reg, icpu, cpu); */
+    S9xFixCycles();
+/*    CHECK_FOR_IRQ(); */
 }
 
-static void OpE2 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpE2 (void)
 {
-    uint8 Work8 = *cpu->PC++;
-    reg->PL |= Work8;
-    icpu->_Carry |= Work8 & 1;
-    icpu->_Overflow |= (Work8 >> 6) & 1;
-    icpu->_Negative |= Work8;
+    uint8 Work8 = *CPU.PC++;
+    ICPU.Registers.PL |= Work8;
+    ICPU._Carry |= Work8 & 1;
+    ICPU._Overflow |= (Work8 >> 6) & 1;
+    ICPU._Negative |= Work8;
     if (Work8 & Zero)
-	icpu->_Zero = 0;
-#ifdef VAR_CYCLES
-    cpu->Cycles += cpu->MemSpeed + ONE_CYCLE;
+	ICPU._Zero = 0;
+#ifndef SA1_OPCODES
+    CPU.Cycles += CPU.MemSpeed + ONE_CYCLE;
 #endif
-    if (CHECKEMULATION_OP())
+    if (CheckEmulation())
     {
-	SETFLAGS_OP(MemoryFlag | IndexFlag);
+	SetFlags (MemoryFlag | IndexFlag);
 	missing.emulate6502 = 1;
     }
-    if (CHECKINDEX ())
+    if (CheckIndex ())
     {
-	reg->XH = 0;
-	reg->YH = 0;
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
     }
-    S9xFixCycles(reg, icpu);
+    S9xFixCycles();
 }
 /**********************************************************************************************/
 
 /* XBA *************************************************************************************** */
-static void OpEB (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpEB (void)
 {
-    uint8 Work8 = reg->AL;
-    reg->AL = reg->AH;
-    reg->AH = Work8;
+    uint8 Work8 = ICPU.Registers.AL;
+    ICPU.Registers.AL = ICPU.Registers.AH;
+    ICPU.Registers.AH = Work8;
 
-    SETZN8 (reg->AL);
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+    SetZN8 (ICPU.Registers.AL);
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
 }
 /**********************************************************************************************/
 
 /* RTI *************************************************************************************** */
-static void Op40 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op40 (void)
 {
-    PullB (reg->PL);
-    S9xUnpackStatus_OP ();
-    PullW (reg->PC);
-    if (!CHECKEMULATION_OP())
+    PullB (ICPU.Registers.PL);
+    S9xUnpackStatus ();
+    PullW (ICPU.Registers.PC);
+    if (!CheckEmulation())
     {
-	PullB (reg->PB);
-	icpu->ShiftedPB = (reg->PB & 0xff) << 16;
+	PullB (ICPU.Registers.PB);
+	ICPU.ShiftedPB = ICPU.Registers.PB << 16;
     }
     else
     {
-	SETFLAGS_OP (MemoryFlag | IndexFlag);
+	SetFlags (MemoryFlag | IndexFlag);
 	missing.emulate6502 = 1;
     }
-    S9xSetPCBase (icpu->ShiftedPB + reg->PC, cpu);
-    
-    if (CHECKINDEX ())
+    S9xSetPCBase (ICPU.ShiftedPB + ICPU.Registers.PC);
+    if (CheckIndex ())
     {
-	reg->XH = 0;
-	reg->YH = 0;
+	ICPU.Registers.XH = 0;
+	ICPU.Registers.YH = 0;
     }
-#ifdef VAR_CYCLES
-    cpu->Cycles += TWO_CYCLES;
+#ifndef SA1_OPCODES
+    CPU.Cycles += TWO_CYCLES;
 #endif
-    S9xFixCycles(reg, icpu);
-/*    CHECK_FOR_IRQ(reg, icpu, cpu); */
+    S9xFixCycles();
+/*    CHECK_FOR_IRQ(); */
 }
 
 /**********************************************************************************************/
 
 /* STP/WAI/DB ******************************************************************************** */
 // WAI
-static void OpCB (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpCB (void)
 {
-    if (cpu->IRQActive)
-    {
-#ifdef VAR_CYCLES
-	cpu->Cycles += TWO_CYCLES;
-#else
-#ifndef SA1_OPCODES
-	cpu->Cycles += 2;
+
+// Ok, let's just C-ify the ASM versions separately.
+#ifdef SA1_OPCODES
+    SA1.WaitingForInterrupt = TRUE;
+    SA1.PC--;
+#if 0
+// XXX: FIXME
+    if(Settings.Shutdown){
+        SA1.Cycles = SA1.NextEvent;
+        if (IAPU.APUExecuting)
+        {
+            SA1.Executing = FALSE;
+            do
+            {
+                APU_EXECUTE1 (,         } while (APU.Cycles < SA1.NextEvent,         SA1.Executing = TRUE;
+        }
+    }
 #endif
+#else // SA1_OPCODES
+#if 0
+
+
+    if (CPU.IRQActive)
+    {
+#ifndef SA1_OPCODES
+	CPU.Cycles += TWO_CYCLES;
 #endif
     }
     else
+#endif
     {
-	cpu->WaitingForInterrupt = TRUE;
-	cpu->PC--;
+	CPU.WaitingForInterrupt = TRUE;
+	CPU.PC--;
 #ifdef CPU_SHUTDOWN
-#ifndef SA1_OPCODES
 	if (Settings.Shutdown)
 	{
-	    cpu->Cycles = cpu->NextEvent;
+	    CPU.Cycles = CPU.NextEvent;
 	    if (IAPU.APUExecuting)
 	    {
-		icpu->CPUExecuting = FALSE;
+		ICPU.CPUExecuting = FALSE;
 		do
 		{
 		    APU_EXECUTE1 ();
-		} while (APU.Cycles < cpu->NextEvent);
-		icpu->CPUExecuting = TRUE;
+		} while (APU.Cycles < CPU.NextEvent);
+		ICPU.CPUExecuting = TRUE;
 	    }
 	}
-#else
-	if (Settings.Shutdown)
-	{
-	    SA1ICPU.CPUExecuting = FALSE;
-	    SA1.Executing = FALSE;
-	}
-#endif
+	else
+        {
+#ifndef SA1_OPCODES
+            CPU.Cycles += TWO_CYCLES;
 #endif
     }
+#endif
+    }
+#endif // SA1_OPCODES
 }
 
 // STP
-static void OpDB (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void OpDB (void)
 {
-    cpu->PC--;
-    cpu->Flags |= DEBUG_MODE_FLAG;
+    CPU.PC--;
+    CPU.Flags |= DEBUG_MODE_FLAG;
 }
 
 // Reserved S9xOpcode
-static void Op42 (struct SRegisters * reg, struct SICPU * icpu, struct SCPUState * cpu)
+static void Op42 (void)
 {
 }
 
-/**********************************************************************************************/
+/*****************************************************************************/
 
-/**********************************************************************************************/
+/*****************************************************************************/
 /* CPU-S9xOpcodes Definitions                                                                    */
-/**********************************************************************************************/
+/*****************************************************************************/
 struct SOpcodes S9xOpcodesM1X1[256] =
 {
     {Op00},	 {Op01M1},    {Op02},      {Op03M1},    {Op04M1},
@@ -3989,6 +5096,62 @@ struct SOpcodes S9xOpcodesM1X1[256] =
     {OpF0},      {OpF1M1},    {OpF2M1},    {OpF3M1},    {OpF4},
     {OpF5M1},    {OpF6M1},    {OpF7M1},    {OpF8},      {OpF9M1},
     {OpFAX1},    {OpFB},      {OpFC},      {OpFDM1},    {OpFEM1},
+    {OpFFM1}
+};
+
+struct SOpcodes S9xOpcodesE1[256] =
+{
+    {Op00},	 {Op01M1},    {Op02},      {Op03M1},    {Op04M1},
+    {Op05M1},    {Op06M1},    {Op07M1},    {Op08E1},      {Op09M1},
+    {Op0AM1},    {Op0BE1},      {Op0CM1},    {Op0DM1},    {Op0EM1},
+    {Op0FM1},    {Op10},      {Op11M1},    {Op12M1},    {Op13M1},
+    {Op14M1},    {Op15M1},    {Op16M1},    {Op17M1},    {Op18},
+    {Op19M1},    {Op1AM1},    {Op1B},      {Op1CM1},    {Op1DM1},
+    {Op1EM1},    {Op1FM1},    {Op20},      {Op21M1},    {Op22E1},
+    {Op23M1},    {Op24M1},    {Op25M1},    {Op26M1},    {Op27M1},
+    {Op28},      {Op29M1},    {Op2AM1},    {Op2BE1},      {Op2CM1},
+    {Op2DM1},    {Op2EM1},    {Op2FM1},    {Op30},      {Op31M1},
+    {Op32M1},    {Op33M1},    {Op34M1},    {Op35M1},    {Op36M1},
+    {Op37M1},    {Op38},      {Op39M1},    {Op3AM1},    {Op3B},
+    {Op3CM1},    {Op3DM1},    {Op3EM1},    {Op3FM1},    {Op40},
+    {Op41M1},    {Op42},      {Op43M1},    {Op44X1},    {Op45M1},
+    {Op46M1},    {Op47M1},    {Op48E1},    {Op49M1},    {Op4AM1},
+    {Op4BE1},      {Op4C},      {Op4DM1},    {Op4EM1},    {Op4FM1},
+    {Op50},      {Op51M1},    {Op52M1},    {Op53M1},    {Op54X1},
+    {Op55M1},    {Op56M1},    {Op57M1},    {Op58},      {Op59M1},
+    {Op5AE1},    {Op5B},      {Op5C},      {Op5DM1},    {Op5EM1},
+    {Op5FM1},    {Op60},      {Op61M1},    {Op62E1},      {Op63M1},
+    {Op64M1},    {Op65M1},    {Op66M1},    {Op67M1},    {Op68E1},
+    {Op69M1},    {Op6AM1},    {Op6BE1},      {Op6C},      {Op6DM1},
+    {Op6EM1},    {Op6FM1},    {Op70},      {Op71M1},    {Op72M1},
+    {Op73M1},    {Op74M1},    {Op75M1},    {Op76M1},    {Op77M1},
+    {Op78},      {Op79M1},    {Op7AE1},    {Op7B},      {Op7C},
+    {Op7DM1},    {Op7EM1},    {Op7FM1},    {Op80},      {Op81M1},
+    {Op82},      {Op83M1},    {Op84X1},    {Op85M1},    {Op86X1},
+    {Op87M1},    {Op88X1},    {Op89M1},    {Op8AM1},    {Op8BE1},
+    {Op8CX1},    {Op8DM1},    {Op8EX1},    {Op8FM1},    {Op90},
+    {Op91M1},    {Op92M1},    {Op93M1},    {Op94X1},    {Op95M1},
+    {Op96X1},    {Op97M1},    {Op98M1},    {Op99M1},    {Op9A},
+    {Op9BX1},    {Op9CM1},    {Op9DM1},    {Op9EM1},    {Op9FM1},
+    {OpA0X1},    {OpA1M1},    {OpA2X1},    {OpA3M1},    {OpA4X1},
+    {OpA5M1},    {OpA6X1},    {OpA7M1},    {OpA8X1},    {OpA9M1},
+    {OpAAX1},    {OpABE1},      {OpACX1},    {OpADM1},    {OpAEX1},
+    {OpAFM1},    {OpB0},      {OpB1M1},    {OpB2M1},    {OpB3M1},
+    {OpB4X1},    {OpB5M1},    {OpB6X1},    {OpB7M1},    {OpB8},
+    {OpB9M1},    {OpBAX1},    {OpBBX1},    {OpBCX1},    {OpBDM1},
+    {OpBEX1},    {OpBFM1},    {OpC0X1},    {OpC1M1},    {OpC2},
+    {OpC3M1},    {OpC4X1},    {OpC5M1},    {OpC6M1},    {OpC7M1},
+    {OpC8X1},    {OpC9M1},    {OpCAX1},    {OpCB},      {OpCCX1},
+    {OpCDM1},    {OpCEM1},    {OpCFM1},    {OpD0},      {OpD1M1},
+    {OpD2M1},    {OpD3M1},    {OpD4E1},      {OpD5M1},    {OpD6M1},
+    {OpD7M1},    {OpD8},      {OpD9M1},    {OpDAE1},    {OpDB},
+    {OpDC},      {OpDDM1},    {OpDEM1},    {OpDFM1},    {OpE0X1},
+    {OpE1M1},    {OpE2},      {OpE3M1},    {OpE4X1},    {OpE5M1},
+    {OpE6M1},    {OpE7M1},    {OpE8X1},    {OpE9M1},    {OpEA},
+    {OpEB},      {OpECX1},    {OpEDM1},    {OpEEM1},    {OpEFM1},
+    {OpF0},      {OpF1M1},    {OpF2M1},    {OpF3M1},    {OpF4E1},
+    {OpF5M1},    {OpF6M1},    {OpF7M1},    {OpF8},      {OpF9M1},
+    {OpFAE1},    {OpFB},      {OpFCE1},      {OpFDM1},    {OpFEM1},
     {OpFFM1}
 };
 
@@ -4159,3 +5322,4 @@ struct SOpcodes S9xOpcodesM0X1[256] =
     {OpFAX1},    {OpFB},      {OpFC},      {OpFDM0},    {OpFEM0},
     {OpFFM0}
 };
+
