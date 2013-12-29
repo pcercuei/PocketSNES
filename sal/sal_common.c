@@ -904,7 +904,7 @@ u32 sal_AudioRateNext(u32 currRate)
 {
 	s32 x;
 	u32 newRate;
-	for (x=0;x<sizeof(mAudioRateLookup);x++)
+	for (x=0;x<sizeof(mAudioRateLookup)/sizeof(mAudioRateLookup[0]);x++)
 	{
 		newRate=mAudioRateLookup[x];
 		if(newRate>currRate) break;
@@ -916,7 +916,7 @@ u32 sal_AudioRatePrevious(u32 currRate)
 {
 	s32 x;
 	u32 newRate;
-	for (x=sizeof(mAudioRateLookup)-1; x>=0; x--)
+	for (x=(sizeof(mAudioRateLookup)/sizeof(mAudioRateLookup[0]))-1; x>=0; x--)
 	{
 		newRate=mAudioRateLookup[x];
 		if(newRate<currRate) break;
