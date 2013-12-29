@@ -364,10 +364,8 @@ bool8_32 S9xOpenSoundDevice(int a, unsigned char b, int c)
 
 void S9xAutoSaveSRAM (void)
 {
-	//since I can't sync the data, there is no point in even writing the data
-	//out at this point.  Instead I'm now saving the data as the users enter the menu.
-	//Memory.SaveSRAM (S9xGetFilename (".srm"));
-	//sync();  can't sync when emulator is running as it causes delays
+	Memory.SaveSRAM (S9xGetFilename (".srm"));
+	sync();
 }
 
 void S9xLoadSRAM (void)
