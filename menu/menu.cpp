@@ -563,7 +563,7 @@ s32 FileSelect()
 
 		// Draw screen:
 		PrintTile();
-		PrintTitle("Rom Select");
+		PrintTitle("ROM selection");
 
 		smooth=smooth*7+(focus<<8); smooth>>=3;
 
@@ -760,10 +760,10 @@ static s32 SaveStateSelect(s32 mode)
 				sal_VideoPrint(144,145,"FREE",SAL_RGB(31,31,31));
 				break;
 			case 3:
-				sal_VideoPrint(104,145,"Previewing....",SAL_RGB(31,31,31));
+				sal_VideoPrint(104,145,"Previewing...",SAL_RGB(31,31,31));
 				break;
 			case 4:
-				sal_VideoPrint(88,145,"Previewing....fail",SAL_RGB(31,31,31));
+				sal_VideoPrint(88,145,"Previewing failed",SAL_RGB(31,8,8));
 				break;
 			case 5: 
 				sal_VideoBitmapScale(0, 0, SNES_WIDTH, SNES_HEIGHT, 320/2, 240/2, 320/2, &mTempFb[0], (u16*)sal_VideoGetBuffer()+(320*85)+(640-SNES_WIDTH)+16);
@@ -776,17 +776,17 @@ static s32 SaveStateSelect(s32 mode)
 				sal_VideoPrint(124,145,"Saving...",SAL_RGB(31,31,31));
 				break;
 			case 7:
-				sal_VideoPrint(124,145,"Saving...Fail!",SAL_RGB(31,31,31));
+				sal_VideoPrint(124,145,"Saving failed",SAL_RGB(31,8,8));
 				break;
 			case 8:
-				sal_VideoPrint(116,145,"loading....",SAL_RGB(31,31,31));
+				sal_VideoPrint(116,145,"Loading...",SAL_RGB(31,31,31));
 				break;
 				case 9:
-				sal_VideoPrint(116,145,"loading....Fail",SAL_RGB(31,31,31));
+				sal_VideoPrint(116,145,"Loading failed",SAL_RGB(31,8,8));
 				break;
 			case 10:	
 				PrintBar(145-4);
-				sal_VideoPrint(104,145,"Return To Menu",SAL_RGB(31,31,31));
+				sal_VideoPrint(104,145,"Return to menu",SAL_RGB(31,31,31));
 				break;
 			case 12:
 				sal_VideoPrint(124,145,"Slot used",SAL_RGB(31,31,31));
@@ -796,7 +796,7 @@ static s32 SaveStateSelect(s32 mode)
 				else if(mode==2) sal_VideoPrint((320-(strlen(MENU_TEXT_DELETE_SAVESTATE)<<3))>>1,175,MENU_TEXT_DELETE_SAVESTATE,SAL_RGB(31,31,31));
 				break;
 			case 13:
-				sal_VideoPrint(116,145,"Deleting....",SAL_RGB(31,31,31));
+				sal_VideoPrint(116,145,"Deleting...",SAL_RGB(31,31,31));
 				break;
 		}
       
@@ -906,9 +906,9 @@ s32 SaveStateMenu(void)
 	u32 keys=0;
 
 	//Update
-	strcpy(mMenuText[SAVESTATE_MENU_LOAD],"Load State");
-	strcpy(mMenuText[SAVESTATE_MENU_SAVE],"Save State");
-	strcpy(mMenuText[SAVESTATE_MENU_DELETE],"Delete State");
+	strcpy(mMenuText[SAVESTATE_MENU_LOAD],"Load state");
+	strcpy(mMenuText[SAVESTATE_MENU_SAVE],"Save state");
+	strcpy(mMenuText[SAVESTATE_MENU_DELETE],"Delete state");
 	strcpy(mMenuText[SAVESTATE_MENU_RETURN],"Back");
 	sal_InputIgnore();
 
@@ -1016,15 +1016,15 @@ void MainMenuUpdateText(s32 menu_index)
 	switch(menu_index)
 	{
 		case MENU_STATE:
-			strcpy(mMenuText[MENU_STATE],"Save States");
+			strcpy(mMenuText[MENU_STATE],"Save states");
 			break;
 
 		case MENU_RESET_GAME:
-			strcpy(mMenuText[MENU_RESET_GAME],"Reset Game");
+			strcpy(mMenuText[MENU_RESET_GAME],"Reset game");
 			break;
 
 		case MENU_EXIT_APP:
-			strcpy(mMenuText[MENU_EXIT_APP],"Exit Application");
+			strcpy(mMenuText[MENU_EXIT_APP],"Exit PocketSNES");
 			break;
 
 		case MENU_CREDITS:
@@ -1032,7 +1032,7 @@ void MainMenuUpdateText(s32 menu_index)
 			break;
 
 		case MENU_RETURN:
-			strcpy(mMenuText[MENU_RETURN],"Return To Game");
+			strcpy(mMenuText[MENU_RETURN],"Return to game");
 			break;
 
 #if 0
@@ -1056,7 +1056,7 @@ void MainMenuUpdateText(s32 menu_index)
 			break;
 		
 		case MENU_SOUND_RATE:		
-			sprintf(mMenuText[MENU_SOUND_RATE],"Sound Rate:                 %d",mMenuOptions->soundRate);
+			sprintf(mMenuText[MENU_SOUND_RATE],"Sound rate:                 %d",mMenuOptions->soundRate);
 			break;
 
 		case MENU_SOUND_STEREO:
@@ -1108,23 +1108,23 @@ void MainMenuUpdateText(s32 menu_index)
 #endif
 			
 		case MENU_LOAD_GLOBAL_SETTINGS:
-			strcpy(mMenuText[MENU_LOAD_GLOBAL_SETTINGS],"Load Global Settings");
+			strcpy(mMenuText[MENU_LOAD_GLOBAL_SETTINGS],"Load global settings");
 			break;
 			
 		case MENU_SAVE_GLOBAL_SETTINGS:
-			strcpy(mMenuText[MENU_SAVE_GLOBAL_SETTINGS],"Save Global Settings");
+			strcpy(mMenuText[MENU_SAVE_GLOBAL_SETTINGS],"Save global settings");
 			break;
 			
 		case MENU_LOAD_CURRENT_SETTINGS:
-			strcpy(mMenuText[MENU_LOAD_CURRENT_SETTINGS],"Load Settings For Current Game");
+			strcpy(mMenuText[MENU_LOAD_CURRENT_SETTINGS],"Load settings for current game");
 			break;
 		
 		case MENU_SAVE_CURRENT_SETTINGS:
-			strcpy(mMenuText[MENU_SAVE_CURRENT_SETTINGS],"Save Settings For Current Game");
+			strcpy(mMenuText[MENU_SAVE_CURRENT_SETTINGS],"Save settings for current game");
 			break;
 
 		case MENU_DELETE_CURRENT_SETTINGS:
-			strcpy(mMenuText[MENU_DELETE_CURRENT_SETTINGS],"Delete Settings For Current Game");
+			strcpy(mMenuText[MENU_DELETE_CURRENT_SETTINGS],"Delete settings for current game");
 			break;
 
 		case MENU_SAVE_SRAM:
@@ -1132,7 +1132,7 @@ void MainMenuUpdateText(s32 menu_index)
 			break;
 
 		case MENU_ROM_SELECT:
-			strcpy(mMenuText[MENU_ROM_SELECT],"Select Rom");
+			strcpy(mMenuText[MENU_ROM_SELECT],"Select ROM");
 			break;
 	}
 }
@@ -1236,11 +1236,13 @@ s32 MenuRun(s8 *romName)
 		return action;
 	}
 
+#if 0
 	if((mMenuOptions->autoSaveSram) && (mRomName[0]!=0))
 	{
 		MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
 		S9xSaveSRAM(0);
 	}
+#endif
 
 	MainMenuUpdateTextAll();
 	sal_InputIgnore();
