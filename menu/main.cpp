@@ -350,7 +350,6 @@ void S9xSaveSRAM (int showWarning)
 	{
 		MenuMessageBox("SRAM saving ignored","No changes have been made to SRAM","",MENU_MESSAGE_BOX_MODE_MSG);
 	}
-	sleep(1);
 }
 
 
@@ -507,7 +506,7 @@ int SnesInit()
 	Settings.SupportHiRes = FALSE;
 	Settings.NetPlay = FALSE;
 	Settings.ServerName [0] = 0;
-	Settings.AutoSaveDelay = 30;
+	Settings.AutoSaveDelay = 1;
 	Settings.ApplyCheats = TRUE;
 	Settings.TurboMode = FALSE;
 	Settings.TurboSkipFrames = 15;
@@ -698,6 +697,9 @@ int mainEntry(int argc, char* argv[])
 
 		if(event==EVENT_EXIT_APP) break;	
 	}
+
+	MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
+	S9xSaveSRAM(0);
 
 	if(mTempState) free(mTempState);
 	mTempState=NULL;
