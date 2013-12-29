@@ -331,7 +331,13 @@ const char *S9xBasename (const char *f)
       return (f);
 }
 
-
+void PSNESForceSaveSRAM (void)
+{
+	if(mRomName[0] != 0 && Memory.SaveSRAM ((s8*)S9xGetFilename (".srm")))
+	{
+		sync();
+	}
+}
 
 void S9xSaveSRAM (int showWarning)
 {
@@ -654,8 +660,14 @@ int mainEntry(int argc, char* argv[])
 		{
 			if(mTempState) free(mTempState);
 			mTempState=NULL;
+			if (mRomName[0] != 0)
+			{
+				MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
+				PSNESForceSaveSRAM();
+			}
 			if(SnesRomLoad() == SAL_ERROR) 
 			{
+				mRomName[0] = 0;
 				MenuMessageBox("Failed to load ROM",mRomName,"Press any button to continue", MENU_MESSAGE_BOX_MODE_PAUSE);
 				sal_Reset();
 		    		return 0;
@@ -699,7 +711,7 @@ int mainEntry(int argc, char* argv[])
 	}
 
 	MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
-	S9xSaveSRAM(0);
+	PSNESForceSaveSRAM();
 
 	if(mTempState) free(mTempState);
 	mTempState=NULL;
