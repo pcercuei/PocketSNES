@@ -149,19 +149,19 @@ s32 MenuMessageBox(const char *message1, const char *message2,
 	       if(select==SAL_OK)
 	       {
 			  PrintBar(120-4);
-	          sal_VideoPrint(8,120,"YES",SAL_RGB(0,0,0));
+	          sal_VideoPrint(8,120,"YES",SAL_RGB(31,31,31));
 	          sal_VideoPrint(8,140,"NO",SAL_RGB(31,31,31));
 	       }
 	       else
 	       {
 			  PrintBar(140-4);
 	          sal_VideoPrint(8,120,"YES",SAL_RGB(31,31,31));
-	          sal_VideoPrint(8,140,"NO",SAL_RGB(0,0,0));
+	          sal_VideoPrint(8,140,"NO",SAL_RGB(31,31,31));
 	       }
 	       break;
 	case MENU_MESSAGE_BOX_MODE_PAUSE: 
 			PrintBar(120-4);
-			sal_VideoPrint(8,120,"Press button to continue",SAL_RGB(0,0,0));
+			sal_VideoPrint(8,120,"Press button to continue",SAL_RGB(31,31,31));
 			break;
 	case MENU_MESSAGE_BOX_MODE_MSG:
 			subaction=SAL_OK;
@@ -582,7 +582,7 @@ s32 FileSelect()
            
 			if (i==focus)
 			{
-				color=SAL_RGB(0,0,0);
+				color=SAL_RGB(31,31,31);
 				PrintBar(y-4);
 			}
 			else
@@ -606,7 +606,7 @@ s32 FileSelect()
 		}
 
 		PrintBar(228-4);
-		sal_VideoPrint(0,228,mRomDir,SAL_RGB(0,0,0));
+		sal_VideoPrint(0,228,mRomDir,SAL_RGB(31,31,31));
 
 		sal_VideoFlip(1);
 		usleep(10000);
@@ -747,7 +747,7 @@ static s32 SaveStateSelect(s32 mode)
 		{
 			PrintBar(60-4);
 			sprintf(text,"SLOT %d",saveno);
-			sal_VideoPrint(136,60,text,SAL_RGB(0,0,0));
+			sal_VideoPrint(136,60,text,SAL_RGB(31,31,31));
 		}
       
 		switch(action)
@@ -785,7 +785,7 @@ static s32 SaveStateSelect(s32 mode)
 				break;
 			case 10:	
 				PrintBar(145-4);
-				sal_VideoPrint(104,145,"Return To Menu",SAL_RGB(0,0,0));
+				sal_VideoPrint(104,145,"Return To Menu",SAL_RGB(31,31,31));
 				break;
 			case 12:
 				sal_VideoPrint(124,145,"Slot used",SAL_RGB(31,31,31));
@@ -884,7 +884,7 @@ void RenderMenu(const char *menuName, s32 menuCount, s32 menuSmooth, s32 menufoc
       
       		if (i==menufocus)
       		{
-        		color=SAL_RGB(0,0,0);
+        		color=SAL_RGB(31,31,31);
 			PrintBar(y-4);
       		}
       		else
