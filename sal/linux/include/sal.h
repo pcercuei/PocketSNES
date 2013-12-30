@@ -67,7 +67,7 @@ extern "C" {
 #define SAL_DIR_SEP				"/"
 #define SAL_DIR_SEP_BAD				"\\"
 
-#define SAL_RGB(r,g,b) (u16)((r) << 11 | (g) << 6 | (b) << 1 )
+#define SAL_RGB(r,g,b) (u16)((r) << 11 | (g) << 6 | (b))
 #define SAL_RGB_PAL(r,g,b) SAL_RGB(r,g,b)
 
 #define SAL_SEEK_END	SEEK_END
