@@ -378,6 +378,9 @@ void S9xLoadSRAM (void)
 	Memory.LoadSRAM ((s8*)S9xGetFilename (".srm"));
 }
 
+static u32 LastAudioRate = 0;
+static u32 LastStereo = 0;
+
 static
 int Run(int sound)
 {
@@ -393,13 +396,22 @@ int Run(int sound)
 		*/
 		Settings.SixteenBitSound=true;
 
-		sal_AudioInit(mMenuOptions.soundRate, 16,
-					mMenuOptions.stereo, Memory.ROMFramesPerSecond);
+		if (LastAudioRate != mMenuOptions.soundRate || LastStereo != mMenuOptions.stereo)
+		{
+			if (LastAudioRate != 0)
+			{
+				sal_AudioClose();
+			}
+			sal_AudioInit(mMenuOptions.soundRate, 16,
+						mMenuOptions.stereo, Memory.ROMFramesPerSecond);
 
-		S9xInitSound (mMenuOptions.soundRate,
-					mMenuOptions.stereo, sal_AudioGetBufferSize());
-		S9xSetPlaybackRate(mMenuOptions.soundRate);
+			S9xInitSound (mMenuOptions.soundRate,
+						mMenuOptions.stereo, sal_AudioGetSamplesPerFrame() * sal_AudioGetBytesPerSample());
+			S9xSetPlaybackRate(mMenuOptions.soundRate);
+			LastAudioRate = mMenuOptions.soundRate;
+		}
 		S9xSetSoundMute (FALSE);
+		sal_AudioResume();
 
 	} else {
 		S9xSetSoundMute (TRUE);
@@ -421,11 +433,7 @@ int Run(int sound)
 				//Run SNES for one glorious frame
 				S9xMainLoop ();
 
-				if (sound) {
-					S9xMixSamples((uint8 *) sal_GetCurrentAudioBuffer(),
-								sal_AudioGetSampleCount());
-					sal_SubmitSamples();
-				}
+				sal_AudioGenerate(sal_AudioGetSamplesPerFrame());
 //				HandleQuickStateRequests();
 			}
 			if (done>=aim) break; // Up to date now
@@ -436,7 +444,7 @@ int Run(int sound)
   	}
 
 	if (sound)
-		sal_AudioClose();
+		sal_AudioPause();
 
 	mEnterMenu=0;
 	return mEnterMenu;
