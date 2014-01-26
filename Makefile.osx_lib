@@ -3,8 +3,8 @@
 
 TARGET = PocketSNES.dylib
 
-CC  := $(CROSS_COMPILE)clang
-CXX := $(CROSS_COMPILE)clang++
+CC  := $(CROSS_COMPILE)gcc
+CXX := $(CROSS_COMPILE)g++
 STRIP := $(CROSS_COMPILE)strip
 
 SYSROOT := $(shell $(CC) --print-sysroot)
