@@ -1,43 +1,91 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
 #include "snes9x.h"
 #include "spc700.h"
 #include "memmap.h"
@@ -48,70 +96,58 @@
 // SPC700/Sound DSP chips have a 24.57MHz crystal on their PCB.
 
 #ifdef NO_INLINE_SET_GET
-uint8 FASTCALL S9xAPUGetByteZ (uint8 address, struct SIAPU *);
-uint8 FASTCALL S9xAPUGetByte (uint32 address, struct SIAPU *);
-void FASTCALL S9xAPUSetByteZ (uint8, uint8 address, struct SIAPU *, struct SAPU *);
-void FASTCALL S9xAPUSetByte (uint8, uint32 address, struct SIAPU *, struct SAPU *);
+uint8 S9xAPUGetByteZ (uint8 address);
+uint8 S9xAPUGetByte (uint32 address);
+void S9xAPUSetByteZ (uint8, uint8 address);
+void S9xAPUSetByte (uint8, uint32 address);
 
 #else
 #undef INLINE
-#define INLINE __inline
+#define INLINE inline
 #include "apumem.h"
 #endif
 
-START_EXTERN_C
-/*
-extern uint8 Work8;
-extern uint16 Work16;
-extern uint32 Work32;
-extern signed char Int8;
-extern short Int16;
-extern long Int32;
-extern short Int16;
-extern uint8 W1;
-extern uint8 W2;
-*/
-END_EXTERN_C
-
-#define OP1 (*(iapu->PC + 1))
-#define OP2 (*(iapu->PC + 2))
+#define OP1 (*(IAPU.PC + 1))
+#define OP2 (*(IAPU.PC + 2))
 
 #ifdef SPC700_SHUTDOWN
 #define APUShutdown() \
-    if (Settings.Shutdown && (iapu->PC == iapu->WaitAddress1 || iapu->PC == iapu->WaitAddress2)) \
+    if (Settings.Shutdown && (IAPU.PC == IAPU.WaitAddress1 || IAPU.PC == IAPU.WaitAddress2)) \
     { \
-	if (iapu->WaitCounter == 0) \
+	if (IAPU.WaitCounter == 0) \
 	{ \
 	    if (!ICPU.CPUExecuting) \
-		apu->Cycles = CPU.Cycles = CPU.NextEvent; \
+		APU.Cycles = CPU.Cycles = CPU.NextEvent; \
 	    else \
-		iapu->APUExecuting = FALSE; \
+		IAPU.APUExecuting = FALSE; \
 	} \
 	else \
-	if (iapu->WaitCounter >= 2) \
-	    iapu->WaitCounter = 1; \
+	if (IAPU.WaitCounter >= 2) \
+	    IAPU.WaitCounter = 1; \
 	else \
-	    iapu->WaitCounter--; \
+	    IAPU.WaitCounter--; \
     }
 #else
 #define APUShutdown()
 #endif
 
 #define APUSetZN8(b)\
-    iapu->_Zero = (b);
+    IAPU._Zero = (b);
 
 #define APUSetZN16(w)\
-    iapu->_Zero = ((w) != 0) | ((w) >> 8);
+    IAPU._Zero = ((w) != 0) | ((w) >> 8);
 
 void STOP (char *s)
 {
     char buffer[100];
 
 #ifdef DEBUGGER
-    S9xAPUOPrint (buffer, iapu->PC - iapu->RAM);
+    S9xAPUOPrint (buffer, IAPU.PC - IAPU.RAM);
+#else
+    buffer[0] = '\0';
 #endif
 
-    sprintf (String, "Sound CPU in unknown state executing %s at %04X\n%s\n", s, IAPU.PC - IAPU.RAM, buffer);
+    sprintf (String, "Sound CPU in unknown state executing %s at %04X\n%s\n", s, (int)(IAPU.PC - IAPU.RAM), buffer);
     S9xMessage (S9X_ERROR, S9X_APU_STOPPED, String);
     APU.TimerEnabled[0] = APU.TimerEnabled[1] = APU.TimerEnabled[2] = FALSE;
     IAPU.APUExecuting = FALSE;
@@ -125,278 +161,279 @@ void STOP (char *s)
 
 #define TCALL(n)\
 {\
-    PushW (iapu->PC - iapu->RAM + 1); \
-    iapu->PC = iapu->RAM + (apu->ExtraRAM [((15 - n) << 1)] + \
-	     (apu->ExtraRAM [((15 - n) << 1) + 1] << 8)); \
+    PushW (IAPU.PC - IAPU.RAM + 1); \
+    IAPU.PC = IAPU.RAM + (APU.ExtraRAM [((15 - n) << 1)] + \
+	     (APU.ExtraRAM [((15 - n) << 1) + 1] << 8)); \
 }
 
-// XXX: HalfCarry
+// XXX: HalfCarry - BJ fixed?
 #define SBC(a,b)\
 int16 Int16 = (short) (a) - (short) (b) + (short) (APUCheckCarry ()) - 1;\
-APUClearHalfCarry ();\
-iapu->_Carry = Int16 >= 0;\
+IAPU._Carry = Int16 >= 0;\
 if ((((a) ^ (b)) & 0x80) && (((a) ^ (uint8) Int16) & 0x80))\
     APUSetOverflow ();\
 else \
     APUClearOverflow (); \
+APUSetHalfCarry ();\
+if(((a) ^ (b) ^ (uint8) Int16) & 0x10)\
+    APUClearHalfCarry ();\
 (a) = (uint8) Int16;\
 APUSetZN8 ((uint8) Int16);
 
-// XXX: HalfCarry
+// XXX: HalfCarry - BJ fixed?
+// XXX: HalfCarry used Int16 before; trying to fix it with Work16 [Neb]
 #define ADC(a,b)\
 uint16 Work16 = (a) + (b) + APUCheckCarry();\
-APUClearHalfCarry ();\
-iapu->_Carry = Work16 >= 0x100; \
+IAPU._Carry = Work16 >= 0x100; \
 if (~((a) ^ (b)) & ((b) ^ (uint8) Work16) & 0x80)\
     APUSetOverflow ();\
 else \
     APUClearOverflow (); \
+APUClearHalfCarry ();\
+if(((a) ^ (b) ^ (uint8) Work16) & 0x10)\
+    APUSetHalfCarry ();\
 (a) = (uint8) Work16;\
 APUSetZN8 ((uint8) Work16);
 
 #define CMP(a,b)\
 int16 Int16 = (short) (a) - (short) (b);\
-iapu->_Carry = Int16 >= 0;\
+IAPU._Carry = Int16 >= 0;\
 APUSetZN8 ((uint8) Int16);
 
 #define ASL(b)\
-    iapu->_Carry = ((b) & 0x80) != 0; \
+    IAPU._Carry = ((b) & 0x80) != 0; \
     (b) <<= 1;\
     APUSetZN8 (b);
 #define LSR(b)\
-    iapu->_Carry = (b) & 1;\
+    IAPU._Carry = (b) & 1;\
     (b) >>= 1;\
     APUSetZN8 (b);
 #define ROL(b)\
     uint16 Work16 = ((b) << 1) | APUCheckCarry (); \
-    iapu->_Carry = Work16 >= 0x100; \
+    IAPU._Carry = Work16 >= 0x100; \
     (b) = (uint8) Work16; \
     APUSetZN8 (b);
 #define ROR(b)\
     uint16 Work16 = (b) | ((uint16) APUCheckCarry () << 8); \
-    iapu->_Carry = (uint8) Work16 & 1; \
+    IAPU._Carry = (uint8) Work16 & 1; \
     Work16 >>= 1; \
     (b) = (uint8) Work16; \
     APUSetZN8 (b);
 
 #define Push(b)\
-    *(iapu->RAM + 0x100 + areg->S) = b;\
-    areg->S = ((areg->S-1) & 0xff);
+    *(IAPU.RAM + 0x100 + IAPU.Registers.S) = b;\
+    IAPU.Registers.S--;
 
 #define Pop(b)\
-    areg->S = ((areg->S+1) & 0xff);\
-    (b) = *(iapu->RAM + 0x100 + areg->S);
+    IAPU.Registers.S++;\
+    (b) = *(IAPU.RAM + 0x100 + IAPU.Registers.S);
 
 #ifdef FAST_LSB_WORD_ACCESS
 #define PushW(w)\
-    *(uint16 *) (iapu->RAM + 0xff + areg->S) = w;\
-    areg->S = ((areg->S-2) & 0xff);;
+    *(uint16 *) (IAPU.RAM + 0xff + IAPU.Registers.S) = w;\
+    IAPU.Registers.S -= 2;
 #define PopW(w)\
-    areg->S = ((areg->S+2) & 0xff);\
-    w = *(uint16 *) (iapu->RAM + 0xff + areg->S);
+    IAPU.Registers.S += 2;\
+    w = *(uint16 *) (IAPU.RAM + 0xff + IAPU.Registers.S);
 #else
 #define PushW(w)\
-    *(iapu->RAM + 0xff + areg->S) = w;\
-    *(iapu->RAM + 0x100 + areg->S) = (w >> 8);\
-    areg->S = ((areg->S-2) & 0xff);;
+    *(IAPU.RAM + 0xff + IAPU.Registers.S) = w;\
+    *(IAPU.RAM + 0x100 + IAPU.Registers.S) = (w >> 8);\
+    IAPU.Registers.S -= 2;
 #define PopW(w)\
-    areg->S = ((areg->S+2) & 0xff);; \
-    (w) = *(iapu->RAM + 0xff + areg->S) + (*(iapu->RAM + 0x100 + areg->S) << 8);
+    IAPU.Registers.S += 2; \
+    (w) = *(IAPU.RAM + 0xff + IAPU.Registers.S) + (*(IAPU.RAM + 0x100 + IAPU.Registers.S) << 8);
 #endif
 
 #define Relative()\
     int8 Int8 = OP1;\
-    int16 Int16 = (int) (iapu->PC + 2 - iapu->RAM) + Int8;
+    int16 Int16 = (int) (IAPU.PC + 2 - IAPU.RAM) + Int8;
 
 #define Relative2()\
     int8 Int8 = OP2;\
-    int16 Int16 = (int) (iapu->PC + 3 - iapu->RAM) + Int8;
+    int16 Int16 = (int) (IAPU.PC + 3 - IAPU.RAM) + Int8;
 
 #ifdef FAST_LSB_WORD_ACCESS
 #define IndexedXIndirect()\
-    iapu->Address = *(uint16 *) (iapu->DirectPage + ((OP1 + areg->X) & 0xff));
+    IAPU.Address = *(uint16 *) (IAPU.DirectPage + ((OP1 + IAPU.Registers.X) & 0xff));
 
 #define Absolute()\
-    iapu->Address = *(uint16 *) (iapu->PC + 1);
+    IAPU.Address = *(uint16 *) (IAPU.PC + 1);
 
 #define AbsoluteX()\
-    iapu->Address = *(uint16 *) (iapu->PC + 1) + areg->X;
+    IAPU.Address = *(uint16 *) (IAPU.PC + 1) + IAPU.Registers.X;
 
 #define AbsoluteY()\
-    iapu->Address = *(uint16 *) (iapu->PC + 1) + areg->YA.B.Y;
+    IAPU.Address = *(uint16 *) (IAPU.PC + 1) + IAPU.Registers.YA.B.Y;
 
 #define MemBit()\
-    iapu->Address = *(uint16 *) (iapu->PC + 1);\
-    iapu->Bit = (uint8)(iapu->Address >> 13);\
-    iapu->Address &= 0x1fff;
+    IAPU.Address = *(uint16 *) (IAPU.PC + 1);\
+    IAPU.Bit = (uint8)(IAPU.Address >> 13);\
+    IAPU.Address &= 0x1fff;
 
 #define IndirectIndexedY()\
-    iapu->Address = *(uint16 *) (iapu->DirectPage + OP1) + areg->YA.B.Y;
+    IAPU.Address = *(uint16 *) (IAPU.DirectPage + OP1) + IAPU.Registers.YA.B.Y;
 #else
 #define IndexedXIndirect()\
-    iapu->Address = *(iapu->DirectPage + ((OP1 + areg->X) & 0xff)) + \
-		  (*(iapu->DirectPage + ((OP1 + areg->X + 1) & 0xff)) << 8);
+    IAPU.Address = *(IAPU.DirectPage + ((OP1 + IAPU.Registers.X) & 0xff)) + \
+		  (*(IAPU.DirectPage + ((OP1 + IAPU.Registers.X + 1) & 0xff)) << 8);
 #define Absolute()\
-    iapu->Address = OP1 + (OP2 << 8);
+    IAPU.Address = OP1 + (OP2 << 8);
 
 #define AbsoluteX()\
-    iapu->Address = OP1 + (OP2 << 8) + areg->X;
+    IAPU.Address = OP1 + (OP2 << 8) + IAPU.Registers.X;
 
 #define AbsoluteY()\
-    iapu->Address = OP1 + (OP2 << 8) + areg->YA.B.Y;
+    IAPU.Address = OP1 + (OP2 << 8) + IAPU.Registers.YA.B.Y;
 
 #define MemBit()\
-    iapu->Address = OP1 + (OP2 << 8);\
-    iapu->Bit = (int8) (iapu->Address >> 13);\
-    iapu->Address &= 0x1fff;
+    IAPU.Address = OP1 + (OP2 << 8);\
+    IAPU.Bit = (int8) (IAPU.Address >> 13);\
+    IAPU.Address &= 0x1fff;
 
 #define IndirectIndexedY()\
-    iapu->Address = *(iapu->DirectPage + OP1) + \
-		  (*(iapu->DirectPage + OP1 + 1) << 8) + \
-		  areg->YA.B.Y;
+    IAPU.Address = *(IAPU.DirectPage + OP1) + \
+		  (*(IAPU.DirectPage + OP1 + 1) << 8) + \
+		  IAPU.Registers.YA.B.Y;
 #endif
 
-void Apu00 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu00 ()
 {
 // NOP
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-#ifdef _SNESPPC
-#pragma warning(disable : 4554)
-#endif
+void Apu01 () { TCALL (0) }
 
-void Apu01 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (0) }
+void Apu11 () { TCALL (1) }
 
-void Apu11 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (1) }
+void Apu21 () { TCALL (2) }
 
-void Apu21 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (2) }
+void Apu31 () { TCALL (3) }
 
-void Apu31 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (3) }
+void Apu41 () { TCALL (4) }
 
-void Apu41 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (4) }
+void Apu51 () { TCALL (5) }
 
-void Apu51 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (5) }
+void Apu61 () { TCALL (6) }
 
-void Apu61 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (6) }
+void Apu71 () { TCALL (7) }
 
-void Apu71 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (7) }
+void Apu81 () { TCALL (8) }
 
-void Apu81 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (8) }
+void Apu91 () { TCALL (9) }
 
-void Apu91 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (9) }
+void ApuA1 () { TCALL (10) }
 
-void ApuA1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (10) }
+void ApuB1 () { TCALL (11) }
 
-void ApuB1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (11) }
+void ApuC1 () { TCALL (12) }
 
-void ApuC1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (12) }
+void ApuD1 () { TCALL (13) }
 
-void ApuD1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (13) }
+void ApuE1 () { TCALL (14) }
 
-void ApuE1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (14) }
+void ApuF1 () { TCALL (15) }
 
-void ApuF1 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) { TCALL (15) }
-
-void Apu3F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) // CALL absolute
+void Apu3F () // CALL absolute
 {
     Absolute ();
     // 0xB6f for Star Fox 2
-    PushW (iapu->PC + 3 - iapu->RAM);
-    iapu->PC = iapu->RAM + iapu->Address;
+    PushW (IAPU.PC + 3 - IAPU.RAM);
+    IAPU.PC = IAPU.RAM + IAPU.Address;
 }
 
-void Apu4F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu) // PCALL $XX
+void Apu4F () // PCALL $XX
 {
     uint8 Work8 = OP1;
-    PushW (iapu->PC + 2 - iapu->RAM);
-    iapu->PC = iapu->RAM + 0xff00 + Work8;
+    PushW (IAPU.PC + 2 - IAPU.RAM);
+    IAPU.PC = IAPU.RAM + 0xff00 + Work8;
 }
 
 #define SET(b) \
-S9xAPUSetByteZ ((uint8) (S9xAPUGetByteZ (OP1 , iapu) | (1 << (b))), OP1, iapu, apu); \
-iapu->PC += 2
+S9xAPUSetByteZ ((uint8) (S9xAPUGetByteZ (OP1 ) | (1 << (b))), OP1); \
+IAPU.PC += 2
 
-void Apu02 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu02 ()
 {
     SET (0);
 }
 
-void Apu22 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu22 ()
 {
     SET (1);
 }
 
-void Apu42 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu42 ()
 {
     SET (2);
 }
 
-void Apu62 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu62 ()
 {
     SET (3);
 }
 
-void Apu82 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu82 ()
 {
     SET (4);
 }
 
-void ApuA2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA2 ()
 {
     SET (5);
 }
 
-void ApuC2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC2 ()
 {
     SET (6);
 }
 
-void ApuE2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE2 ()
 {
     SET (7);
 }
 
 #define CLR(b) \
-S9xAPUSetByteZ ((uint8) (S9xAPUGetByteZ (OP1, iapu) & ~(1 << (b))), OP1, iapu, apu); \
-iapu->PC += 2;
+S9xAPUSetByteZ ((uint8) (S9xAPUGetByteZ (OP1) & ~(1 << (b))), OP1); \
+IAPU.PC += 2;
 
-void Apu12 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu12 ()
 {
     CLR (0);
 }
 
-void Apu32 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu32 ()
 {
     CLR (1);
 }
 
-void Apu52 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu52 ()
 {
     CLR (2);
 }
 
-void Apu72 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu72 ()
 {
     CLR (3);
 }
 
-void Apu92 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu92 ()
 {
     CLR (4);
 }
 
-void ApuB2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB2 ()
 {
     CLR (5);
 }
 
-void ApuD2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD2 ()
 {
     CLR (6);
 }
 
-void ApuF2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF2 ()
 {
     CLR (7);
 }
@@ -404,50 +441,50 @@ void ApuF2 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
 #define BBS(b) \
 uint8 Work8 = OP1; \
 Relative2 (); \
-if (S9xAPUGetByteZ (Work8, iapu) & (1 << (b))) \
+if (S9xAPUGetByteZ (Work8) & (1 << (b))) \
 { \
-    iapu->PC = iapu->RAM + (uint16) Int16; \
-    apu->Cycles += iapu->TwoCycles; \
+    IAPU.PC = IAPU.RAM + (uint16) Int16; \
+    APU.Cycles += IAPU.TwoCycles; \
 } \
 else \
-    iapu->PC += 3
+    IAPU.PC += 3
 
-void Apu03 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu03 ()
 {
     BBS (0);
 }
 
-void Apu23 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu23 ()
 {
     BBS (1);
 }
 
-void Apu43 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu43 ()
 {
     BBS (2);
 }
 
-void Apu63 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu63 ()
 {
     BBS (3);
 }
 
-void Apu83 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu83 ()
 {
     BBS (4);
 }
 
-void ApuA3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA3 ()
 {
     BBS (5);
 }
 
-void ApuC3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC3 ()
 {
     BBS (6);
 }
 
-void ApuE3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE3 ()
 {
     BBS (7);
 }
@@ -455,2018 +492,2024 @@ void ApuE3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
 #define BBC(b) \
 uint8 Work8 = OP1; \
 Relative2 (); \
-if (!(S9xAPUGetByteZ (Work8, iapu) & (1 << (b)))) \
+if (!(S9xAPUGetByteZ (Work8) & (1 << (b)))) \
 { \
-    iapu->PC = iapu->RAM + (uint16) Int16; \
-    apu->Cycles += iapu->TwoCycles; \
+    IAPU.PC = IAPU.RAM + (uint16) Int16; \
+    APU.Cycles += IAPU.TwoCycles; \
 } \
 else \
-    iapu->PC += 3
+    IAPU.PC += 3
 
-void Apu13 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu13 ()
 {
     BBC (0);
 }
 
-void Apu33 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu33 ()
 {
     BBC (1);
 }
 
-void Apu53 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu53 ()
 {
     BBC (2);
 }
 
-void Apu73 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu73 ()
 {
     BBC (3);
 }
 
-void Apu93 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu93 ()
 {
     BBC (4);
 }
 
-void ApuB3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB3 ()
 {
     BBC (5);
 }
 
-void ApuD3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD3 ()
 {
     BBC (6);
 }
 
-void ApuF3 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF3 ()
 {
     BBC (7);
 }
 
-void Apu04 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu04 ()
 {
 // OR A,dp
-    areg->YA.B.A |= S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu05 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu05 ()
 {
 // OR A,abs
     Absolute ();
-    areg->YA.B.A |= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu06 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu06 ()
 {
 // OR A,(X)
-    areg->YA.B.A |= S9xAPUGetByteZ (areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByteZ (IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu07 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu07 ()
 {
 // OR A,(dp+X)
     IndexedXIndirect ();
-    areg->YA.B.A |= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu08 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu08 ()
 {
 // OR A,#00
-    areg->YA.B.A |= OP1;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A |= OP1;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu09 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu09 ()
 {
 // OR dp(dest),dp(src)
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    Work8 |= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    Work8 |= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu14 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu14 ()
 {
 // OR A,dp+X
-    areg->YA.B.A |= S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu15 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu15 ()
 {
 // OR A,abs+X
     AbsoluteX ();
-    areg->YA.B.A |= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu16 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu16 ()
 {
 // OR A,abs+Y
     AbsoluteY ();
-    areg->YA.B.A |= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu17 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu17 ()
 {
 // OR A,(dp)+Y
     IndirectIndexedY ();
-    areg->YA.B.A |= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A |= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu18 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu18 ()
 {
 // OR dp,#00
     uint8 Work8 = OP1;
-    Work8 |= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    Work8 |= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu19 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu19 ()
 {
 // OR (X),(Y)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu) | S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X) | S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     APUSetZN8 (Work8);
-    S9xAPUSetByteZ (Work8, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (Work8, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void Apu0A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0A ()
 {
 // OR1 C,membit
     MemBit ();
     if (!APUCheckCarry ())
     {
-	if (S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit))
+	if (S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit))
 	    APUSetCarry ();
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu2A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2A ()
 {
 // OR1 C,not membit
     MemBit ();
     if (!APUCheckCarry ())
     {
-	if (!(S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit)))
+	if (!(S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit)))
 	    APUSetCarry ();
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu4A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu4A ()
 {
 // AND1 C,membit
     MemBit ();
     if (APUCheckCarry ())
     {
-	if (!(S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit)))
+	if (!(S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit)))
 	    APUClearCarry ();
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu6A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6A ()
 {
 // AND1 C, not membit
     MemBit ();
     if (APUCheckCarry ())
     {
-	if ((S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit)))
+	if ((S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit)))
 	    APUClearCarry ();
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu8A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8A ()
 {
 // EOR1 C, membit
     MemBit ();
     if (APUCheckCarry ())
     {
-	if (S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit))
+	if (S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit))
 	    APUClearCarry ();
     }
     else
     {
-	if (S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit))
+	if (S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit))
 	    APUSetCarry ();
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void ApuAA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAA ()
 {
 // MOV1 C,membit
     MemBit ();
-    if (S9xAPUGetByte (iapu->Address, iapu) & (1 << iapu->Bit))
+    if (S9xAPUGetByte (IAPU.Address) & (1 << IAPU.Bit))
 	APUSetCarry ();
     else
 	APUClearCarry ();
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void ApuCA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCA ()
 {
 // MOV1 membit,C
     MemBit ();
     if (APUCheckCarry ())
     {
-	S9xAPUSetByte (S9xAPUGetByte (iapu->Address, iapu) | (1 << iapu->Bit), iapu->Address, iapu, apu);
+	S9xAPUSetByte (S9xAPUGetByte (IAPU.Address) | (1 << IAPU.Bit), IAPU.Address);
     }
     else
     {
-	S9xAPUSetByte (S9xAPUGetByte (iapu->Address, iapu) & ~(1 << iapu->Bit), iapu->Address, iapu, apu);
+	S9xAPUSetByte (S9xAPUGetByte (IAPU.Address) & ~(1 << IAPU.Bit), IAPU.Address);
     }
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void ApuEA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuEA ()
 {
 // NOT1 membit
     MemBit ();
-    S9xAPUSetByte (S9xAPUGetByte (iapu->Address, iapu) ^ (1 << iapu->Bit), iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (S9xAPUGetByte (IAPU.Address) ^ (1 << IAPU.Bit), IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void Apu0B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0B ()
 {
 // ASL dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
     ASL (Work8);
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1);
+    IAPU.PC += 2;
 }
 
-void Apu0C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0C ()
 {
 // ASL abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
     ASL (Work8);
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (Work8, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void Apu1B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1B ()
 {
 // ASL dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
     ASL (Work8);
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void Apu1C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1C ()
 {
 // ASL A
-    ASL (areg->YA.B.A);
-    iapu->PC++;
+    ASL (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu0D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0D ()
 {
 // PUSH PSW
-    S9xAPUPackStatus_OP ();
-    Push (areg->P);
-    iapu->PC++;
+    S9xAPUPackStatus ();
+    Push (IAPU.Registers.P);
+    IAPU.PC++;
 }
 
-void Apu2D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2D ()
 {
 // PUSH A
-    Push (areg->YA.B.A);
-    iapu->PC++;
+    Push (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu4D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu4D ()
 {
 // PUSH X
-    Push (areg->X);
-    iapu->PC++;
+    Push (IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void Apu6D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6D ()
 {
 // PUSH Y
-    Push (areg->YA.B.Y);
-    iapu->PC++;
+    Push (IAPU.Registers.YA.B.Y);
+    IAPU.PC++;
 }
 
-void Apu8E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8E ()
 {
 // POP PSW
-    Pop (areg->P);
-    S9xAPUUnpackStatus_OP ();
-    if (APUCHECKDIRECTPAGE_OP ())
-	iapu->DirectPage = iapu->RAM + 0x100;
+    Pop (IAPU.Registers.P);
+    S9xAPUUnpackStatus ();
+    if (APUCheckDirectPage ())
+	IAPU.DirectPage = IAPU.RAM + 0x100;
     else
-	iapu->DirectPage = iapu->RAM;
-    iapu->PC++;
+	IAPU.DirectPage = IAPU.RAM;
+    IAPU.PC++;
 }
 
-void ApuAE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAE ()
 {
 // POP A
-    Pop (areg->YA.B.A);
-    iapu->PC++;
+    Pop (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuCE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCE ()
 {
 // POP X
-    Pop (areg->X);
-    iapu->PC++;
+    Pop (IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void ApuEE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuEE ()
 {
 // POP Y
-    Pop (areg->YA.B.Y);
-    iapu->PC++;
+    Pop (IAPU.Registers.YA.B.Y);
+    IAPU.PC++;
 }
 
-void Apu0E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0E ()
 {
 // TSET1 abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    S9xAPUSetByte (Work8 | areg->YA.B.A, iapu->Address, iapu, apu);
-    Work8 &= areg->YA.B.A;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    S9xAPUSetByte (Work8 | IAPU.Registers.YA.B.A, IAPU.Address);
+    Work8 &= IAPU.Registers.YA.B.A;
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu4E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu4E ()
 {
 // TCLR1 abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    S9xAPUSetByte (Work8 & ~areg->YA.B.A, iapu->Address, iapu, apu);
-    Work8 &= areg->YA.B.A;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    S9xAPUSetByte (Work8 & ~IAPU.Registers.YA.B.A, IAPU.Address);
+    Work8 &= IAPU.Registers.YA.B.A;
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu0F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu0F ()
 {
 // BRK
 
 #if 0
     STOP ("BRK");
 #else
-    PushW (iapu->PC + 1 - iapu->RAM);
-    S9xAPUPackStatus_OP ();
-    Push (areg->P);
+    PushW (IAPU.PC + 1 - IAPU.RAM);
+    S9xAPUPackStatus ();
+    Push (IAPU.Registers.P);
     APUSetBreak ();
     APUClearInterrupt ();
 // XXX:Where is the BRK vector ???
-    iapu->PC = iapu->RAM + apu->ExtraRAM[0x20] + (apu->ExtraRAM[0x21] << 8);
+    IAPU.PC = IAPU.RAM + APU.ExtraRAM[0x20] + (APU.ExtraRAM[0x21] << 8);
 #endif
 }
 
-void ApuEF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuEF ()
 {
 // SLEEP
     // XXX: sleep
     // STOP ("SLEEP");
-    iapu->APUExecuting = FALSE;
-    iapu->PC++;
+    IAPU.APUExecuting = FALSE;
+    IAPU.PC++;
 }
 
-void ApuFF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFF ()
 {
 // STOP
     // STOP ("STOP");
-    iapu->APUExecuting = FALSE;
-    iapu->PC++;
+    IAPU.APUExecuting = FALSE;
+    IAPU.PC++;
 }
 
-void Apu10 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu10 ()
 {
 // BPL
     Relative ();
     if (!APUCheckNegative ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu30 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu30 ()
 {
 // BMI
     Relative ();
     if (APUCheckNegative ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu90 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu90 ()
 {
 // BCC
     Relative ();
     if (!APUCheckCarry ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void ApuB0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB0 ()
 {
 // BCS
     Relative ();
     if (APUCheckCarry ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void ApuD0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD0 ()
 {
 // BNE
     Relative ();
     if (!APUCheckZero ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void ApuF0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF0 ()
 {
 // BEQ
     Relative ();
     if (APUCheckZero ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu50 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu50 ()
 {
 // BVC
     Relative ();
     if (!APUCheckOverflow ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu70 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu70 ()
 {
 // BVS
     Relative ();
     if (APUCheckOverflow ())
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu2F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2F ()
 {
 // BRA
     Relative ();
-    iapu->PC = iapu->RAM + (uint16) Int16;
+    IAPU.PC = IAPU.RAM + (uint16) Int16;
 }
 
-void Apu80 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu80 ()
 {
 // SETC
     APUSetCarry ();
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuED (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuED ()
 {
 // NOTC
-    iapu->_Carry ^= 1;
-    iapu->PC++;
+    IAPU._Carry ^= 1;
+    IAPU.PC++;
 }
 
-void Apu40 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu40 ()
 {
 // SETP
     APUSetDirectPage ();
-    iapu->DirectPage = iapu->RAM + 0x100;
-    iapu->PC++;
+    IAPU.DirectPage = IAPU.RAM + 0x100;
+    IAPU.PC++;
 }
 
-void Apu1A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1A ()
 {
 // DECW dp
-    uint16 Work16 = S9xAPUGetByteZ (OP1, iapu) + (S9xAPUGetByteZ (OP1 + 1, iapu) << 8);
+    uint16 Work16 = S9xAPUGetByteZ (OP1) + (S9xAPUGetByteZ (OP1 + 1) << 8);
     Work16--;
-    S9xAPUSetByteZ ((uint8) Work16, OP1, iapu, apu);
-    S9xAPUSetByteZ (Work16 >> 8, OP1 + 1, iapu, apu);
+    S9xAPUSetByteZ ((uint8) Work16, OP1);
+    S9xAPUSetByteZ (Work16 >> 8, OP1 + 1);
     APUSetZN16 (Work16);
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void Apu5A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5A ()
 {
 // CMPW YA,dp
-    uint16 Work16 = S9xAPUGetByteZ (OP1, iapu) + (S9xAPUGetByteZ (OP1 + 1, iapu) << 8);
-    int32 Int32 = (long) areg->YA.W - (long) Work16;
-    iapu->_Carry = Int32 >= 0;
+    uint16 Work16 = S9xAPUGetByteZ (OP1) + (S9xAPUGetByteZ (OP1 + 1) << 8);
+    int32 Int32 = (long) IAPU.Registers.YA.W - (long) Work16;
+    IAPU._Carry = Int32 >= 0;
     APUSetZN16 ((uint16) Int32);
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void Apu3A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu3A ()
 {
 // INCW dp
-    uint16 Work16 = S9xAPUGetByteZ (OP1, iapu) + (S9xAPUGetByteZ (OP1 + 1, iapu) << 8);
+    uint16 Work16 = S9xAPUGetByteZ (OP1) + (S9xAPUGetByteZ (OP1 + 1) << 8);
     Work16++;
-    S9xAPUSetByteZ ((uint8) Work16, OP1, iapu, apu);
-    S9xAPUSetByteZ (Work16 >> 8, OP1 + 1, iapu, apu);
+    S9xAPUSetByteZ ((uint8) Work16, OP1);
+    S9xAPUSetByteZ (Work16 >> 8, OP1 + 1);
     APUSetZN16 (Work16);
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void Apu7A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+// XXX: HalfCarry - BJ Fixed? Or is it between bits 7 and 8 for ADDW/SUBW?
+void Apu7A ()
 {
 // ADDW YA,dp
-    uint16 Work16 = S9xAPUGetByteZ (OP1, iapu) + (S9xAPUGetByteZ (OP1 + 1, iapu) << 8);
-    uint32 Work32 = (uint32) areg->YA.W + Work16;
-    APUClearHalfCarry ();
-    iapu->_Carry = Work32 >= 0x10000;
-    if (~(areg->YA.W ^ Work16) & (Work16 ^ (uint16) Work32) & 0x8000)
+    uint16 Work16 = S9xAPUGetByteZ (OP1) + (S9xAPUGetByteZ (OP1 + 1) << 8);
+    uint32 Work32 = (uint32) IAPU.Registers.YA.W + Work16;
+    IAPU._Carry = Work32 >= 0x10000;
+    if (~(IAPU.Registers.YA.W ^ Work16) & (Work16 ^ (uint16) Work32) & 0x8000)
 	APUSetOverflow ();
     else
 	APUClearOverflow ();
-    areg->YA.W = (uint16) Work32;
-    APUSetZN16 (areg->YA.W);
-    iapu->PC += 2;
+    APUClearHalfCarry ();
+    if((IAPU.Registers.YA.W ^ Work16 ^ (uint16) Work32) & 0x10)
+        APUSetHalfCarry ();
+    IAPU.Registers.YA.W = (uint16) Work32;
+    APUSetZN16 (IAPU.Registers.YA.W);
+    IAPU.PC += 2;
 }
 
-void Apu9A (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+// XXX: BJ: i think the old HalfCarry behavior was wrong...
+// XXX: Or is it between bits 7 and 8 for ADDW/SUBW?
+// XXX: Used Work32 instead of Int32 before. Fixed? [Neb]
+void Apu9A ()
 {
 // SUBW YA,dp
-    uint16 Work16 = S9xAPUGetByteZ (OP1, iapu) + (S9xAPUGetByteZ (OP1 + 1, iapu) << 8);
-    int32 Int32 = (long) areg->YA.W - (long) Work16;
+    uint16 Work16 = S9xAPUGetByteZ (OP1) + (S9xAPUGetByteZ (OP1 + 1) << 8);
+    int32 Int32 = (long) IAPU.Registers.YA.W - (long) Work16;
     APUClearHalfCarry ();
-    iapu->_Carry = Int32 >= 0;
-    if (((areg->YA.W ^ Work16) & 0x8000) &&
-	    ((areg->YA.W ^ (uint16) Int32) & 0x8000))
+    IAPU._Carry = Int32 >= 0;
+    if (((IAPU.Registers.YA.W ^ Work16) & 0x8000) &&
+	    ((IAPU.Registers.YA.W ^ (uint16) Int32) & 0x8000))
 	APUSetOverflow ();
     else
 	APUClearOverflow ();
-    if (((areg->YA.W ^ Work16) & 0x0080) &&
-	    ((areg->YA.W ^ (uint16) Int32) & 0x0080))
+    if (((IAPU.Registers.YA.W ^ Work16) & 0x0080) &&
+	    ((IAPU.Registers.YA.W ^ (uint16) Int32) & 0x0080))
 	APUSetHalfCarry ();
-    areg->YA.W = (uint16) Int32;
-    APUSetZN16 (areg->YA.W);
-    iapu->PC += 2;
+    APUSetHalfCarry ();
+    if((IAPU.Registers.YA.W ^ Work16 ^ (uint16) Int32) & 0x10)
+        APUClearHalfCarry ();
+    IAPU.Registers.YA.W = (uint16) Int32;
+    APUSetZN16 (IAPU.Registers.YA.W);
+    IAPU.PC += 2;
 }
 
-void ApuBA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBA ()
 {
 // MOVW YA,dp
-    areg->YA.B.A = S9xAPUGetByteZ (OP1, iapu);
-    areg->YA.B.Y = S9xAPUGetByteZ (OP1 + 1, iapu);
-    APUSetZN16 (areg->YA.W);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = S9xAPUGetByteZ (OP1);
+    IAPU.Registers.YA.B.Y = S9xAPUGetByteZ (OP1 + 1);
+    APUSetZN16 (IAPU.Registers.YA.W);
+    IAPU.PC += 2;
 }
 
-void ApuDA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDA ()
 {
 // MOVW dp,YA
-    S9xAPUSetByteZ (areg->YA.B.A, OP1, iapu, apu);
-    S9xAPUSetByteZ (areg->YA.B.Y, OP1 + 1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.A, OP1);
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.Y, OP1 + 1);
+    IAPU.PC += 2;
 }
 
-void Apu64 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu64 ()
 {
 // CMP A,dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu65 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu65 ()
 {
 // CMP A,abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu66 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu66 ()
 {
 // CMP A,(X)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC++;
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC++;
 }
 
-void Apu67 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu67 ()
 {
 // CMP A,(dp+X)
     IndexedXIndirect ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu68 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu68 ()
 {
 // CMP A,#00
     uint8 Work8 = OP1;
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu69 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu69 ()
 {
 // CMP dp(dest), dp(src)
-    uint8 W1 = S9xAPUGetByteZ (OP1, iapu);
-    uint8 Work8 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 W1 = S9xAPUGetByteZ (OP1);
+    uint8 Work8 = S9xAPUGetByteZ (OP2);
     CMP (Work8, W1);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu74 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu74 ()
 {
 // CMP A, dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu75 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu75 ()
 {
 // CMP A,abs+X
     AbsoluteX ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu76 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu76 ()
 {
 // CMP A, abs+Y
     AbsoluteY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu77 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu77 ()
 {
 // CMP A,(dp)+Y
     IndirectIndexedY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu78 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu78 ()
 {
 // CMP dp,#00
     uint8 Work8 = OP1;
-    uint8 W1 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 W1 = S9xAPUGetByteZ (OP2);
     CMP (W1, Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu79 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu79 ()
 {
 // CMP (X),(Y)
-    uint8 W1 = S9xAPUGetByteZ (areg->X, iapu);
-    uint8 Work8 = S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 W1 = S9xAPUGetByteZ (IAPU.Registers.X);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     CMP (W1, Work8);
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void Apu1E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1E ()
 {
 // CMP X,abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->X, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.X, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu3E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu3E ()
 {
 // CMP X,dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    CMP (areg->X, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    CMP (IAPU.Registers.X, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuC8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC8 ()
 {
 // CMP X,#00
-    CMP (areg->X, OP1);
-    iapu->PC += 2;
+    CMP (IAPU.Registers.X, OP1);
+    IAPU.PC += 2;
 }
 
-void Apu5E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5E ()
 {
 // CMP Y,abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    CMP (areg->YA.B.Y, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    CMP (IAPU.Registers.YA.B.Y, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu7E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu7E ()
 {
 // CMP Y,dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    CMP (areg->YA.B.Y, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    CMP (IAPU.Registers.YA.B.Y, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuAD (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAD ()
 {
 // CMP Y,#00
     uint8 Work8 = OP1;
-    CMP (areg->YA.B.Y, Work8);
-    iapu->PC += 2;
+    CMP (IAPU.Registers.YA.B.Y, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu1F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1F ()
 {
 // JMP (abs+X)
     Absolute ();
-    iapu->PC = iapu->RAM + S9xAPUGetByte (iapu->Address + areg->X, iapu) +
-	(S9xAPUGetByte (iapu->Address + areg->X + 1, iapu) << 8);
+    IAPU.PC = IAPU.RAM + S9xAPUGetByte (IAPU.Address + IAPU.Registers.X) +
+	(S9xAPUGetByte (IAPU.Address + IAPU.Registers.X + 1) << 8);
 // XXX: HERE:
-    // apu->Flags |= TRACE_FLAG;
+    // APU.Flags |= TRACE_FLAG;
 }
 
-void Apu5F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5F ()
 {
 // JMP abs
     Absolute ();
-    iapu->PC = iapu->RAM + iapu->Address;
+    IAPU.PC = IAPU.RAM + IAPU.Address;
 }
 
-void Apu20 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu20 ()
 {
 // CLRP
     APUClearDirectPage ();
-    iapu->DirectPage = iapu->RAM;
-    iapu->PC++;
+    IAPU.DirectPage = IAPU.RAM;
+    IAPU.PC++;
 }
 
-void Apu60 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu60 ()
 {
 // CLRC
     APUClearCarry ();
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuE0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE0 ()
 {
 // CLRV
     APUClearHalfCarry ();
     APUClearOverflow ();
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void Apu24 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu24 ()
 {
 // AND A,dp
-    areg->YA.B.A &= S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu25 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu25 ()
 {
 // AND A,abs
     Absolute ();
-    areg->YA.B.A &= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu26 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu26 ()
 {
 // AND A,(X)
-    areg->YA.B.A &= S9xAPUGetByteZ (areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByteZ (IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu27 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu27 ()
 {
 // AND A,(dp+X)
     IndexedXIndirect ();
-    areg->YA.B.A &= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu28 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu28 ()
 {
 // AND A,#00
-    areg->YA.B.A &= OP1;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A &= OP1;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu29 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu29 ()
 {
 // AND dp(dest),dp(src)
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    Work8 &= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    Work8 &= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu34 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu34 ()
 {
 // AND A,dp+X
-    areg->YA.B.A &= S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu35 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu35 ()
 {
 // AND A,abs+X
     AbsoluteX ();
-    areg->YA.B.A &= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu36 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu36 ()
 {
 // AND A,abs+Y
     AbsoluteY ();
-    areg->YA.B.A &= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu37 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu37 ()
 {
 // AND A,(dp)+Y
     IndirectIndexedY ();
-    areg->YA.B.A &= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A &= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu38 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu38 ()
 {
 // AND dp,#00
     uint8 Work8 = OP1;
-    Work8 &= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    Work8 &= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu39 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu39 ()
 {
 // AND (X),(Y)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu) & S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X) & S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     APUSetZN8 (Work8);
-    S9xAPUSetByteZ (Work8, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (Work8, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void Apu2B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2B ()
 {
 // ROL dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
     ROL (Work8);
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1);
+    IAPU.PC += 2;
 }
 
-void Apu2C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2C ()
 {
 // ROL abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
     ROL (Work8);
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (Work8, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void Apu3B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu3B ()
 {
 // ROL dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
     ROL (Work8);
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void Apu3C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu3C ()
 {
 // ROL A
-    ROL (areg->YA.B.A);
-    iapu->PC++;
+    ROL (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu2E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu2E ()
 {
 // CBNE dp,rel
     uint8 Work8 = OP1;
     Relative2 ();
     
-    if (S9xAPUGetByteZ (Work8, iapu) != areg->YA.B.A)
+    if (S9xAPUGetByteZ (Work8) != IAPU.Registers.YA.B.A)
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 3;
+	IAPU.PC += 3;
 }
 
-void ApuDE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDE ()
 {
 // CBNE dp+X,rel
-    uint8 Work8 = OP1 + areg->X;
+    uint8 Work8 = OP1 + IAPU.Registers.X;
     Relative2 ();
 
-    if (S9xAPUGetByteZ (Work8, iapu) != areg->YA.B.A)
+    if (S9xAPUGetByteZ (Work8) != IAPU.Registers.YA.B.A)
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
 	APUShutdown ();
     }
     else
-	iapu->PC += 3;
+	IAPU.PC += 3;
 }
 
-void Apu3D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu3D ()
 {
 // INC X
-    areg->X = ((areg->X+1) & 0xff);
-    APUSetZN8 (areg->X);
+    IAPU.Registers.X++;
+    APUSetZN8 (IAPU.Registers.X);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuFC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFC ()
 {
 // INC Y
-    areg->YA.B.Y++;
-    APUSetZN8 (areg->YA.B.Y);
+    IAPU.Registers.YA.B.Y++;
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void Apu1D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu1D ()
 {
 // DEC X
-    areg->X = ((areg->X - 1) & 0xff);
-    APUSetZN8 (areg->X);
+    IAPU.Registers.X--;
+    APUSetZN8 (IAPU.Registers.X);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuDC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDC ()
 {
 // DEC Y
-    areg->YA.B.Y--;
-    APUSetZN8 (areg->YA.B.Y);
+    IAPU.Registers.YA.B.Y--;
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuAB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAB ()
 {
 // INC dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu) + 1;
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1) + 1;
+    S9xAPUSetByteZ (Work8, OP1);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void ApuAC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAC ()
 {
 // INC abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu) + 1;
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address) + 1;
+    S9xAPUSetByte (Work8, IAPU.Address);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void ApuBB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBB ()
 {
 // INC dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu) + 1;
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X) + 1;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void ApuBC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBC ()
 {
 // INC A
-    areg->YA.B.A++;
-    APUSetZN8 (areg->YA.B.A);
+    IAPU.Registers.YA.B.A++;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void Apu8B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8B ()
 {
 // DEC dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu) - 1;
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1) - 1;
+    S9xAPUSetByteZ (Work8, OP1);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void Apu8C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8C ()
 {
 // DEC abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu) - 1;
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address) - 1;
+    S9xAPUSetByte (Work8, IAPU.Address);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu9B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu9B ()
 {
 // DEC dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu) - 1;
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X) - 1;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
     APUSetZN8 (Work8);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC += 2;
+    IAPU.PC += 2;
 }
 
-void Apu9C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu9C ()
 {
 // DEC A
-    areg->YA.B.A--;
-    APUSetZN8 (areg->YA.B.A);
+    IAPU.Registers.YA.B.A--;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
 
 #ifdef SPC700_SHUTDOWN
-    iapu->WaitCounter++;
+    IAPU.WaitCounter++;
 #endif
 
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void Apu44 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu44 ()
 {
 // EOR A,dp
-    areg->YA.B.A ^= S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu45 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu45 ()
 {
 // EOR A,abs
     Absolute ();
-    areg->YA.B.A ^= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu46 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu46 ()
 {
 // EOR A,(X)
-    areg->YA.B.A ^= S9xAPUGetByteZ (areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByteZ (IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu47 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu47 ()
 {
 // EOR A,(dp+X)
     IndexedXIndirect ();
-    areg->YA.B.A ^= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu48 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu48 ()
 {
 // EOR A,#00
-    areg->YA.B.A ^= OP1;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A ^= OP1;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu49 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu49 ()
 {
 // EOR dp(dest),dp(src)
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    Work8 ^= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    Work8 ^= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu54 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu54 ()
 {
 // EOR A,dp+X
-    areg->YA.B.A ^= S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu55 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu55 ()
 {
 // EOR A,abs+X
     AbsoluteX ();
-    areg->YA.B.A ^= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu56 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu56 ()
 {
 // EOR A,abs+Y
     AbsoluteY ();
-    areg->YA.B.A ^= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void Apu57 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu57 ()
 {
 // EOR A,(dp)+Y
     IndirectIndexedY ();
-    areg->YA.B.A ^= S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A ^= S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void Apu58 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu58 ()
 {
 // EOR dp,#00
     uint8 Work8 = OP1;
-    Work8 ^= S9xAPUGetByteZ (OP2, iapu);
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
+    Work8 ^= S9xAPUGetByteZ (OP2);
+    S9xAPUSetByteZ (Work8, OP2);
     APUSetZN8 (Work8);
-    iapu->PC += 3;
+    IAPU.PC += 3;
 }
 
-void Apu59 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu59 ()
 {
 // EOR (X),(Y)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu) ^ S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X) ^ S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     APUSetZN8 (Work8);
-    S9xAPUSetByteZ (Work8, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (Work8, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void Apu4B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu4B ()
 {
 // LSR dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
     LSR (Work8);
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1);
+    IAPU.PC += 2;
 }
 
-void Apu4C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu4C ()
 {
 // LSR abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
     LSR (Work8);
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (Work8, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void Apu5B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5B ()
 {
 // LSR dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
     LSR (Work8);
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void Apu5C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5C ()
 {
 // LSR A
-    LSR (areg->YA.B.A);
-    iapu->PC++;
+    LSR (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu7D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu7D ()
 {
 // MOV A,X
-    areg->YA.B.A = areg->X;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A = IAPU.Registers.X;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuDD (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDD ()
 {
 // MOV A,Y
-    areg->YA.B.A = areg->YA.B.Y;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A = IAPU.Registers.YA.B.Y;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu5D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu5D ()
 {
 // MOV X,A
-    areg->X = areg->YA.B.A;
-    APUSetZN8 (areg->X);
-    iapu->PC++;
+    IAPU.Registers.X = IAPU.Registers.YA.B.A;
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void ApuFD (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFD ()
 {
 // MOV Y,A
-    areg->YA.B.Y = areg->YA.B.A;
-    APUSetZN8 (areg->YA.B.Y);
-    iapu->PC++;
+    IAPU.Registers.YA.B.Y = IAPU.Registers.YA.B.A;
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
+    IAPU.PC++;
 }
 
-void Apu9D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu9D ()
 {
 //MOV X,SP
-    areg->X = ((areg->S) & 0xff);
-    APUSetZN8 (areg->X);
-    iapu->PC++;
+    IAPU.Registers.X = IAPU.Registers.S;
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void ApuBD (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBD ()
 {
 // MOV SP,X
-    areg->S = ((areg->X) & 0xff);
-    iapu->PC++;
+    IAPU.Registers.S = IAPU.Registers.X;
+    IAPU.PC++;
 }
 
-void Apu6B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6B ()
 {
 // ROR dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
     ROR (Work8);
-    S9xAPUSetByteZ (Work8, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1);
+    IAPU.PC += 2;
 }
 
-void Apu6C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6C ()
 {
 // ROR abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
     ROR (Work8);
-    S9xAPUSetByte (Work8, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (Work8, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void Apu7B (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu7B ()
 {
 // ROR dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
     ROR (Work8);
-    S9xAPUSetByteZ (Work8, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (Work8, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void Apu7C (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu7C ()
 {
 // ROR A
-    ROR (areg->YA.B.A);
-    iapu->PC++;
+    ROR (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu6E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6E ()
 {
 // DBNZ dp,rel
     uint8 Work8 = OP1;
     Relative2 ();
-    uint8 W1 = S9xAPUGetByteZ (Work8, iapu) - 1;
-    S9xAPUSetByteZ (W1, Work8, iapu, apu);
+    uint8 W1 = S9xAPUGetByteZ (Work8) - 1;
+    S9xAPUSetByteZ (W1, Work8);
     if (W1 != 0)
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
     }
     else
-	iapu->PC += 3;
+	IAPU.PC += 3;
 }
 
-void ApuFE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFE ()
 {
 // DBNZ Y,rel
     Relative ();
-    areg->YA.B.Y--;
-    if (areg->YA.B.Y != 0)
+    IAPU.Registers.YA.B.Y--;
+    if (IAPU.Registers.YA.B.Y != 0)
     {
-	iapu->PC = iapu->RAM + (uint16) Int16;
-	apu->Cycles += iapu->TwoCycles;
+	IAPU.PC = IAPU.RAM + (uint16) Int16;
+	APU.Cycles += IAPU.TwoCycles;
     }
     else
-	iapu->PC += 2;
+	IAPU.PC += 2;
 }
 
-void Apu6F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu6F ()
 {
 // RET
-    PopW (areg->PC);
-    iapu->PC = iapu->RAM + areg->PC;
+    PopW (IAPU.Registers.PC);
+    IAPU.PC = IAPU.RAM + IAPU.Registers.PC;
 }
 
-void Apu7F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu7F ()
 {
 // RETI
     // STOP ("RETI");
-    Pop (areg->P);
-    S9xAPUUnpackStatus_OP ();
-    PopW (areg->PC);
-    iapu->PC = iapu->RAM + areg->PC;
+    Pop (IAPU.Registers.P);
+    S9xAPUUnpackStatus ();
+    PopW (IAPU.Registers.PC);
+    IAPU.PC = IAPU.RAM + IAPU.Registers.PC;
 }
 
-void Apu84 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu84 ()
 {
 // ADC A,dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu85 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu85 ()
 {
 // ADC A, abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu86 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu86 ()
 {
 // ADC A,(X)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC++;
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC++;
 }
 
-void Apu87 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu87 ()
 {
 // ADC A,(dp+X)
     IndexedXIndirect ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu88 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu88 ()
 {
 // ADC A,#00
     uint8 Work8 = OP1;
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu89 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu89 ()
 {
 // ADC dp(dest),dp(src)
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    uint8 W1 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    uint8 W1 = S9xAPUGetByteZ (OP2);
     ADC (W1, Work8);
-    S9xAPUSetByteZ (W1, OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (W1, OP2);
+    IAPU.PC += 3;
 }
 
-void Apu94 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu94 ()
 {
 // ADC A,dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu95 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu95 ()
 {
 // ADC A, abs+X
     AbsoluteX ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu96 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu96 ()
 {
 // ADC A, abs+Y
     AbsoluteY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void Apu97 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu97 ()
 {
 // ADC A, (dp)+Y
     IndirectIndexedY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    ADC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    ADC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void Apu98 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu98 ()
 {
 // ADC dp,#00
     uint8 Work8 = OP1;
-    uint8 W1 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 W1 = S9xAPUGetByteZ (OP2);
     ADC (W1, Work8);
-    S9xAPUSetByteZ (W1, OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (W1, OP2);
+    IAPU.PC += 3;
 }
 
-void Apu99 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu99 ()
 {
 // ADC (X),(Y)
-    uint8 W1 = S9xAPUGetByteZ (areg->X, iapu);
-    uint8 Work8 = S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 W1 = S9xAPUGetByteZ (IAPU.Registers.X);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     ADC (W1, Work8);
-    S9xAPUSetByteZ (W1, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (W1, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void Apu8D (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8D ()
 {
 // MOV Y,#00
-    areg->YA.B.Y = OP1;
-    APUSetZN8 (areg->YA.B.Y);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.Y = OP1;
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
+    IAPU.PC += 2;
 }
 
-void Apu8F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu8F ()
 {
 // MOV dp,#00
     uint8 Work8 = OP1;
-    S9xAPUSetByteZ (Work8, OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (Work8, OP2);
+    IAPU.PC += 3;
 }
 
-void Apu9E (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu9E ()
 {
 // DIV YA,X
-    if (areg->X == 0)
+    if (IAPU.Registers.X == 0)
     {
 	APUSetOverflow ();
-	areg->YA.B.Y = 0xff;
-	areg->YA.B.A = 0xff;
+	IAPU.Registers.YA.B.Y = 0xff;
+	IAPU.Registers.YA.B.A = 0xff;
     }
     else
     {
 	APUClearOverflow ();
-	uint8 Work8 = areg->YA.W / areg->X;
-	areg->YA.B.Y = areg->YA.W % areg->X;
-	areg->YA.B.A = Work8;
+	uint8 Work8 = IAPU.Registers.YA.W / IAPU.Registers.X;
+	IAPU.Registers.YA.B.Y = IAPU.Registers.YA.W % IAPU.Registers.X;
+	IAPU.Registers.YA.B.A = Work8;
     }
 // XXX How should Overflow, Half Carry, Zero and Negative flags be set??
-    // APUSetZN16 (areg->YA.W);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    // APUSetZN16 (IAPU.Registers.YA.W);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void Apu9F (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void Apu9F ()
 {
 // XCN A
-    areg->YA.B.A = (areg->YA.B.A >> 4) | (areg->YA.B.A << 4);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A = (IAPU.Registers.YA.B.A >> 4) | (IAPU.Registers.YA.B.A << 4);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuA4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA4 ()
 {
 // SBC A, dp
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuA5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA5 ()
 {
 // SBC A, abs
     Absolute ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void ApuA6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA6 ()
 {
 // SBC A, (X)
-    uint8 Work8 = S9xAPUGetByteZ (areg->X, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC++;
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.X);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC++;
 }
 
-void ApuA7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA7 ()
 {
 // SBC A,(dp+X)
     IndexedXIndirect ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuA8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA8 ()
 {
 // SBC A,#00
     uint8 Work8 = OP1;
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuA9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA9 ()
 {
 // SBC dp(dest), dp(src)
-    uint8 Work8 = S9xAPUGetByteZ (OP1, iapu);
-    uint8 W1 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 Work8 = S9xAPUGetByteZ (OP1);
+    uint8 W1 = S9xAPUGetByteZ (OP2);
     SBC (W1, Work8);
-    S9xAPUSetByteZ (W1, OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (W1, OP2);
+    IAPU.PC += 3;
 }
 
-void ApuB4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB4 ()
 {
 // SBC A, dp+X
-    uint8 Work8 = S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuB5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB5 ()
 {
 // SBC A,abs+X
     AbsoluteX ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void ApuB6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB6 ()
 {
 // SBC A,abs+Y
     AbsoluteY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 3;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 3;
 }
 
-void ApuB7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB7 ()
 {
 // SBC A,(dp)+Y
     IndirectIndexedY ();
-    uint8 Work8 = S9xAPUGetByte (iapu->Address, iapu);
-    SBC (areg->YA.B.A, Work8);
-    iapu->PC += 2;
+    uint8 Work8 = S9xAPUGetByte (IAPU.Address);
+    SBC (IAPU.Registers.YA.B.A, Work8);
+    IAPU.PC += 2;
 }
 
-void ApuB8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB8 ()
 {
 // SBC dp,#00
     uint8 Work8 = OP1;
-    uint8 W1 = S9xAPUGetByteZ (OP2, iapu);
+    uint8 W1 = S9xAPUGetByteZ (OP2);
     SBC (W1, Work8);
-    S9xAPUSetByteZ (W1, OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (W1, OP2);
+    IAPU.PC += 3;
 }
 
-void ApuB9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuB9 ()
 {
 // SBC (X),(Y)
-    uint8 W1 = S9xAPUGetByteZ (areg->X, iapu);
-    uint8 Work8 = S9xAPUGetByteZ (areg->YA.B.Y, iapu);
+    uint8 W1 = S9xAPUGetByteZ (IAPU.Registers.X);
+    uint8 Work8 = S9xAPUGetByteZ (IAPU.Registers.YA.B.Y);
     SBC (W1, Work8);
-    S9xAPUSetByteZ (W1, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (W1, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void ApuAF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuAF ()
 {
 // MOV (X)+, A
-    S9xAPUSetByteZ (areg->YA.B.A, areg->X++, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.A, IAPU.Registers.X++);
+    IAPU.PC++;
 }
 
-void ApuBE (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBE ()
 {
 // DAS
-   // Implemented by Jonathan Gevaryahu (using the DAA instruction code)
-   uint8 W1 = areg->YA.B.A & 0xf;
-   uint8 W2 = areg->YA.B.A >> 4;
-   APUClearCarry ();
-   if (W1 > 9)
-   {
-       W1 -= 6;
-   }
-   if (W2 > 9)    // This should never happen....
-   {
-       W2 -= 6;
-       APUSetCarry ();
-   }
-   areg->YA.B.A = W1 | (W2 << 4);
-   iapu->PC++;
+    if ((IAPU.Registers.YA.B.A & 0x0f) > 9 || !APUCheckHalfCarry())
+    {
+        IAPU.Registers.YA.B.A -= 6;
+    }
+    if (IAPU.Registers.YA.B.A > 0x9f || !IAPU._Carry)
+    {
+	IAPU.Registers.YA.B.A -= 0x60;
+	APUClearCarry ();
+    }
+    else { APUSetCarry (); }
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuBF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuBF ()
 {
 // MOV A,(X)+
-    areg->YA.B.A = S9xAPUGetByteZ (areg->X++, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A = S9xAPUGetByteZ (IAPU.Registers.X++);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuC0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC0 ()
 {
 // DI
     APUClearInterrupt ();
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuA0 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuA0 ()
 {
 // EI
     APUSetInterrupt ();
-    iapu->PC++;
+    IAPU.PC++;
 }
 
-void ApuC4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC4 ()
 {
 // MOV dp,A
-    S9xAPUSetByteZ (areg->YA.B.A, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.A, OP1);
+    IAPU.PC += 2;
 }
 
-void ApuC5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC5 ()
 {
 // MOV abs,A
     Absolute ();
-    S9xAPUSetByte (areg->YA.B.A, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (IAPU.Registers.YA.B.A, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void ApuC6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC6 ()
 {
 // MOV (X), A
-    S9xAPUSetByteZ (areg->YA.B.A, areg->X, iapu, apu);
-    iapu->PC++;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.A, IAPU.Registers.X);
+    IAPU.PC++;
 }
 
-void ApuC7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC7 ()
 {
 // MOV (dp+X),A
     IndexedXIndirect ();
-    S9xAPUSetByte (areg->YA.B.A, iapu->Address, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByte (IAPU.Registers.YA.B.A, IAPU.Address);
+    IAPU.PC += 2;
 }
 
-void ApuC9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuC9 ()
 {
 // MOV abs,X
     Absolute ();
-    S9xAPUSetByte (areg->X, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (IAPU.Registers.X, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void ApuCB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCB ()
 {
 // MOV dp,Y
-    S9xAPUSetByteZ (areg->YA.B.Y, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.Y, OP1);
+    IAPU.PC += 2;
 }
 
-void ApuCC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCC ()
 {
 // MOV abs,Y
     Absolute ();
-    S9xAPUSetByte (areg->YA.B.Y, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (IAPU.Registers.YA.B.Y, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void ApuCD (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCD ()
 {
 // MOV X,#00
-    areg->X = OP1;
-    APUSetZN8 (areg->X);
-    iapu->PC += 2;
+    IAPU.Registers.X = OP1;
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void ApuCF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuCF ()
 {
 // MUL YA
-    areg->YA.W = (uint16) areg->YA.B.A * areg->YA.B.Y;
-    APUSetZN16 (areg->YA.W);
-    iapu->PC++;
+    IAPU.Registers.YA.W = (uint16) IAPU.Registers.YA.B.A * IAPU.Registers.YA.B.Y;
+    APUSetZN16 (IAPU.Registers.YA.W);
+    IAPU.PC++;
 }
 
-void ApuD4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD4 ()
 {
 // MOV dp+X, A
-    S9xAPUSetByteZ (areg->YA.B.A, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.A, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void ApuD5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD5 ()
 {
 // MOV abs+X,A
     AbsoluteX ();
-    S9xAPUSetByte (areg->YA.B.A, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (IAPU.Registers.YA.B.A, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void ApuD6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD6 ()
 {
 // MOV abs+Y,A
     AbsoluteY ();
-    S9xAPUSetByte (areg->YA.B.A, iapu->Address, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByte (IAPU.Registers.YA.B.A, IAPU.Address);
+    IAPU.PC += 3;
 }
 
-void ApuD7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD7 ()
 {
 // MOV (dp)+Y,A
     IndirectIndexedY ();
-    S9xAPUSetByte (areg->YA.B.A, iapu->Address, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByte (IAPU.Registers.YA.B.A, IAPU.Address);
+    IAPU.PC += 2;
 }
 
-void ApuD8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD8 ()
 {
 // MOV dp,X
-    S9xAPUSetByteZ (areg->X, OP1, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.X, OP1);
+    IAPU.PC += 2;
 }
 
-void ApuD9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuD9 ()
 {
 // MOV dp+Y,X
-    S9xAPUSetByteZ (areg->X, OP1 + areg->YA.B.Y, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.X, OP1 + IAPU.Registers.YA.B.Y);
+    IAPU.PC += 2;
 }
 
-void ApuDB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDB ()
 {
 // MOV dp+X,Y
-    S9xAPUSetByteZ (areg->YA.B.Y, OP1 + areg->X, iapu, apu);
-    iapu->PC += 2;
+    S9xAPUSetByteZ (IAPU.Registers.YA.B.Y, OP1 + IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void ApuDF (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuDF ()
 {
 // DAA
-    uint8 W1 = areg->YA.B.A & 0xf;
-    uint8 W2 = areg->YA.B.A >> 4;
-    APUClearCarry ();
-    if (W1 > 9)
+    if ((IAPU.Registers.YA.B.A & 0x0f) > 9 || APUCheckHalfCarry())
     {
-	W1 -= 6;
+        if(IAPU.Registers.YA.B.A > 0xf0) APUSetCarry ();
+        IAPU.Registers.YA.B.A += 6;
+	//APUSetHalfCarry (); Intel procs do this, but this is a Sony proc...
     }
-    if (W2 > 9)
+    //else { APUClearHalfCarry (); } ditto as above
+    if (IAPU.Registers.YA.B.A > 0x9f || IAPU._Carry)
     {
-	W2 -= 6;
+	IAPU.Registers.YA.B.A += 0x60;
 	APUSetCarry ();
     }
-    areg->YA.B.A = W1 | (W2 << 4);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    else { APUClearCarry (); }
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuE4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE4 ()
 {
 // MOV A, dp
-    areg->YA.B.A = S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void ApuE5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE5 ()
 {
 // MOV A,abs
     Absolute ();
-    areg->YA.B.A = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void ApuE6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE6 ()
 {
 // MOV A,(X)
-    areg->YA.B.A = S9xAPUGetByteZ (areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC++;
+    IAPU.Registers.YA.B.A = S9xAPUGetByteZ (IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC++;
 }
 
-void ApuE7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE7 ()
 {
 // MOV A,(dp+X)
     IndexedXIndirect ();
-    areg->YA.B.A = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void ApuE8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE8 ()
 {
 // MOV A,#00
-    areg->YA.B.A = OP1;
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = OP1;
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void ApuE9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuE9 ()
 {
 // MOV X, abs
     Absolute ();
-    areg->X = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->X);
-    iapu->PC += 3;
+    IAPU.Registers.X = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC += 3;
 }
 
-void ApuEB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuEB ()
 {
 // MOV Y,dp
-    areg->YA.B.Y = S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->YA.B.Y);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.Y = S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
+    IAPU.PC += 2;
 }
 
-void ApuEC (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuEC ()
 {
 // MOV Y,abs
     Absolute ();
-    areg->YA.B.Y = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.Y);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.Y = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
+    IAPU.PC += 3;
 }
 
-void ApuF4 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF4 ()
 {
 // MOV A, dp+X
-    areg->YA.B.A = S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void ApuF5 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF5 ()
 {
 // MOV A, abs+X
     AbsoluteX ();
-    areg->YA.B.A = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void ApuF6 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF6 ()
 {
 // MOV A, abs+Y
     AbsoluteY ();
-    areg->YA.B.A = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 3;
+    IAPU.Registers.YA.B.A = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 3;
 }
 
-void ApuF7 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF7 ()
 {
 // MOV A, (dp)+Y
     IndirectIndexedY ();
-    areg->YA.B.A = S9xAPUGetByte (iapu->Address, iapu);
-    APUSetZN8 (areg->YA.B.A);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.A = S9xAPUGetByte (IAPU.Address);
+    APUSetZN8 (IAPU.Registers.YA.B.A);
+    IAPU.PC += 2;
 }
 
-void ApuF8 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF8 ()
 {
 // MOV X,dp
-    areg->X = S9xAPUGetByteZ (OP1, iapu);
-    APUSetZN8 (areg->X);
-    iapu->PC += 2;
+    IAPU.Registers.X = S9xAPUGetByteZ (OP1);
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void ApuF9 (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuF9 ()
 {
 // MOV X,dp+Y
-    areg->X = S9xAPUGetByteZ (OP1 + areg->YA.B.Y, iapu);
-    APUSetZN8 (areg->X);
-    iapu->PC += 2;
+    IAPU.Registers.X = S9xAPUGetByteZ (OP1 + IAPU.Registers.YA.B.Y);
+    APUSetZN8 (IAPU.Registers.X);
+    IAPU.PC += 2;
 }
 
-void ApuFA (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFA ()
 {
 // MOV dp(dest),dp(src)
-    S9xAPUSetByteZ (S9xAPUGetByteZ (OP1, iapu), OP2, iapu, apu);
-    iapu->PC += 3;
+    S9xAPUSetByteZ (S9xAPUGetByteZ (OP1), OP2);
+    IAPU.PC += 3;
 }
 
-void ApuFB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
+void ApuFB ()
 {
 // MOV Y,dp+X
-    areg->YA.B.Y = S9xAPUGetByteZ (OP1 + areg->X, iapu);
-    APUSetZN8 (areg->YA.B.Y);
-    iapu->PC += 2;
+    IAPU.Registers.YA.B.Y = S9xAPUGetByteZ (OP1 + IAPU.Registers.X);
+    APUSetZN8 (IAPU.Registers.YA.B.Y);
+    IAPU.PC += 2;
 }
 
 #ifdef NO_INLINE_SET_GET
@@ -2475,7 +2518,7 @@ void ApuFB (struct SAPURegisters * areg, struct SIAPU * iapu, struct SAPU * apu)
 #include "apumem.h"
 #endif
 
-void (*S9xApuOpcodes[256]) (struct SAPURegisters *, struct SIAPU *, struct SAPU *) =
+void (*S9xApuOpcodes[256]) (void) =
 {
 	Apu00, Apu01, Apu02, Apu03, Apu04, Apu05, Apu06, Apu07,
 	Apu08, Apu09, Apu0A, Apu0B, Apu0C, Apu0D, Apu0E, Apu0F,
@@ -2510,3 +2553,4 @@ void (*S9xApuOpcodes[256]) (struct SAPURegisters *, struct SIAPU *, struct SAPU 
 	ApuF0, ApuF1, ApuF2, ApuF3, ApuF4, ApuF5, ApuF6, ApuF7,
 	ApuF8, ApuF9, ApuFA, ApuFB, ApuFC, ApuFD, ApuFE, ApuFF
 };
+

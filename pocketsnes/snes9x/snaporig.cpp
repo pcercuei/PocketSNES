@@ -1,49 +1,100 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #include <ctype.h>
 #include <stdlib.h>
 
 #if defined(__unix) || defined(__linux) || defined(__sun) || defined(__DJGPP)
-//#include <unistd.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
@@ -70,26 +121,25 @@ char ROMFilename [1025];
 
 static int ReadOrigSnapshot (STREAM);
 
-bool8_32 S9xLoadOrigSnapshot (const char *filename)
+bool8 S9xLoadOrigSnapshot (const char *filename)
 {
-    STREAM snapshot = NULL;
-    if (S9xOpenSnapshotFile (filename, TRUE, &snapshot))
-    {
+	FILE* fp;
+
+	fp = fopen(filename, "r");
+	if(NULL == fp)
+		return (FALSE);
+
 	int result;
-	if ((result = ReadOrigSnapshot (snapshot)) != SUCCESS)
+	if ((result = ReadOrigSnapshot (fp)) != SUCCESS)
 	{
-	    S9xCloseSnapshotFile (snapshot);
+		fclose(fp);
 	    return (FALSE);
 	}
-	S9xCloseSnapshotFile (snapshot);
+
+	fclose(fp);
 	return (TRUE);
-    }
-    return (FALSE);
 }
 
-#ifdef _SNESPPC
-#pragma warning(disable : 4018)
-#endif
 static int ReadBlock (const char *key, void *block, int max_len, STREAM snap)
 {
     char buffer [20];
@@ -113,7 +163,7 @@ static int ReadBlock (const char *key, void *block, int max_len, STREAM snap)
     {
 	char *junk = new char [rem];
 	READ_STREAM (junk, rem, snap);
-	delete junk;
+	delete[] junk;
     }
 	
     return (SUCCESS);
@@ -180,7 +230,7 @@ static int ReadOrigSnapshot (STREAM snap)
     if ((result = ReadBlock ("REG:", &OrigRegisters, sizeof (OrigRegisters), snap)) != SUCCESS)
 	return (result);
 
-    Registers = *(struct SRegisters *) &OrigRegisters;
+    ICPU.Registers = *(struct SRegisters *) &OrigRegisters;
 
     if ((result = ReadBlock ("PPU:", &OrigPPU, sizeof (OrigPPU), snap)) != SUCCESS)
 	return (result);
@@ -263,12 +313,14 @@ static int ReadOrigSnapshot (STREAM snap)
     PPU.OBJSizeSelect = OrigPPU.OBJSizeSelect;
     PPU.OBJNameBase = OrigPPU.OBJNameBase;
     PPU.OAMReadFlip = OrigPPU.OAMReadFlip;
-    memmove (PPU.OAMData, OrigPPU.OAMData, sizeof (PPU.OAMData));
+    // memmove converted: Different data segments [Neb]
+    memcpy (PPU.OAMData, OrigPPU.OAMData, sizeof (PPU.OAMData));
     PPU.VTimerEnabled = OrigPPU.VTimerEnabled;
     PPU.HTimerEnabled = OrigPPU.HTimerEnabled;
     PPU.HTimerPosition = OrigPPU.HTimerPosition;
     PPU.Mosaic = OrigPPU.Mosaic;
-    memmove (PPU.BGMosaic, OrigPPU.BGMosaic, sizeof (PPU.BGMosaic));
+    // memmove converted: Different data segments [Neb]
+    memcpy (PPU.BGMosaic, OrigPPU.BGMosaic, sizeof (PPU.BGMosaic));
     PPU.Mode7HFlip = OrigPPU.Mode7HFlip;
     PPU.Mode7VFlip = OrigPPU.Mode7VFlip;
     PPU.Mode7Repeat = OrigPPU.Mode7Repeat;
@@ -329,17 +381,24 @@ static int ReadOrigSnapshot (STREAM snap)
 	if ((result = ReadBlock ("ARE:", &OrigAPURegisters,
 				 sizeof (OrigAPURegisters), snap)) != SUCCESS)
 	    return (result);
-	APURegisters = *(struct SAPURegisters *) &OrigAPURegisters;
+	IAPU.Registers = *(struct SAPURegisters *) &OrigAPURegisters;
 	if ((result = ReadBlock ("ARA:", IAPU.RAM, 0x10000, snap)) != SUCCESS)
 	    return (result);
 	if ((result = ReadBlock ("SOU:", &OrigSoundData,
 				 sizeof (SOrigSoundData), snap)) != SUCCESS)
 	    return (result);
 
+#ifndef FOREVER_FORWARD_STEREO
 	SoundData.master_volume_left = OrigSoundData.master_volume_left;
 	SoundData.master_volume_right = OrigSoundData.master_volume_right;
 	SoundData.echo_volume_left = OrigSoundData.echo_volume_left;
 	SoundData.echo_volume_right = OrigSoundData.echo_volume_right; 
+#else
+	SoundData.master_volume [0] = OrigSoundData.master_volume_left;
+	SoundData.master_volume [1] = OrigSoundData.master_volume_right;
+	SoundData.echo_volume [0] = OrigSoundData.echo_volume_left;
+	SoundData.echo_volume [1] = OrigSoundData.echo_volume_right; 
+#endif
 	SoundData.echo_enable = OrigSoundData.echo_enable;
 	SoundData.echo_feedback = OrigSoundData.echo_feedback;
 	SoundData.echo_ptr = OrigSoundData.echo_ptr;
@@ -387,7 +446,7 @@ static int ReadOrigSnapshot (STREAM snap)
 	}
 
 	S9xSetSoundMute (FALSE);
-	IAPU.PC = IAPU.RAM + APURegisters.PC;
+	IAPU.PC = IAPU.RAM + IAPU.Registers.PC;
 	S9xAPUUnpackStatus ();
 	if (APUCheckDirectPage ())
 	    IAPU.DirectPage = IAPU.RAM + 0x100;
@@ -403,12 +462,13 @@ static int ReadOrigSnapshot (STREAM snap)
 	S9xSetSoundMute (TRUE);
     }
     S9xFixSoundAfterSnapshotLoad ();
-    ICPU.ShiftedPB = Registers.PB << 16;
-    ICPU.ShiftedDB = Registers.DB << 16;
-    S9xSetPCBase (ICPU.ShiftedPB + Registers.PC, &CPU);
+    ICPU.ShiftedPB = ICPU.Registers.PB << 16;
+    ICPU.ShiftedDB = ICPU.Registers.DB << 16;
+    S9xSetPCBase (ICPU.ShiftedPB + ICPU.Registers.PC);
     S9xUnpackStatus ();
-    S9xFixCycles (&Registers, &ICPU);
+    S9xFixCycles ();
     S9xReschedule ();
 
     return (SUCCESS);
 }
+

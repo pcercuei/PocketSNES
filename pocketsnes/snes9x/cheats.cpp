@@ -1,52 +1,97 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include "snes9x.h"
 #include "cheats.h"
 #include "memmap.h"
-
-static const char *real_hex  = "0123456789ABCDEF";
-static const char *genie_hex = "DF4709156BC8A23E";
 
 static bool8 S9xAllHex (const char *code, int len)
 {
@@ -59,20 +104,20 @@ static bool8 S9xAllHex (const char *code, int len)
     return (TRUE);
 }
 
-const char *S9xProActionReplayToRaw (const char *code, uint32 &address, uint8 &byte)
+const char *S9xProActionReplayToRaw (const char *code, uint32 *address, uint8 *byte)
 {
     uint32 data = 0;
     if (strlen (code) != 8 || !S9xAllHex (code, 8) ||
         sscanf (code, "%x", &data) != 1)
 	return ("Invalid Pro Action Replay code - should be 8 hex digits in length.");
 
-    address = data >> 8;
-    byte = (uint8) data;
+    *address = data >> 8;
+    *byte = (uint8) data;
     return (NULL);
 }
 
-const char *S9xGoldFingerToRaw (const char *code, uint32 &address, bool8 &sram,
-			        uint8 &num_bytes, uint8 bytes[3])
+const char *S9xGoldFingerToRaw (const char *code, uint32 *address, bool8 *sram,
+			        uint8 *num_bytes, uint8 bytes[3])
 {
     char tmp [15];
     if (strlen (code) != 14)
@@ -80,7 +125,7 @@ const char *S9xGoldFingerToRaw (const char *code, uint32 &address, bool8 &sram,
 
     strncpy (tmp, code, 5);
     tmp [5] = 0;
-    if (sscanf (tmp, "%x", &address) != 1)
+    if (sscanf (tmp, "%x", address) != 1)
 	return ("Invalid Gold Finger code.");
 
     int i;
@@ -93,12 +138,12 @@ const char *S9xGoldFingerToRaw (const char *code, uint32 &address, bool8 &sram,
 	    break;
 	bytes [i] = (uint8) byte;
     }
-    num_bytes = i;
-    sram = code [13] == '1';
+    *num_bytes = i;
+    *sram = code [13] == '1';
     return (NULL);
 }
 
-const char *S9xGameGenieToRaw (const char *code, uint32 &address, uint8 &byte)
+const char *S9xGameGenieToRaw (const char *code, uint32 *address, uint8 *byte)
 {
     char new_code [12];
     
@@ -109,6 +154,9 @@ const char *S9xGameGenieToRaw (const char *code, uint32 &address, uint8 &byte)
     strcpy (new_code, "0x");
     strncpy (new_code + 2, code, 4);
     strcpy (new_code + 6, code + 5);
+
+    static const char *real_hex  = "0123456789ABCDEF";
+    static const char *genie_hex = "DF4709156BC8A23E";
     
     for (int i = 2; i < 10; i++)
     {
@@ -128,23 +176,25 @@ const char *S9xGameGenieToRaw (const char *code, uint32 &address, uint8 &byte)
     }
     uint32 data = 0;
     sscanf (new_code, "%x", &data);
-    byte = (uint8)(data >> 24);
-    address = data & 0xffffff;
-    address = ((address & 0x003c00) << 10) +
-	      ((address & 0x00003c) << 14) +
-	      ((address & 0xf00000) >>  8) +
-	      ((address & 0x000003) << 10) +
-	      ((address & 0x00c000) >>  6) +
-	      ((address & 0x0f0000) >> 12) +
-	      ((address & 0x0003c0) >>  6);
+    *byte = (uint8)(data >> 24);
+    *address = ((data & 0x003c00) << 10) +
+	      ((data & 0x00003c) << 14) +
+	      ((data & 0xf00000) >>  8) +
+	      ((data & 0x000003) << 10) +
+	      ((data & 0x00c000) >>  6) +
+	      ((data & 0x0f0000) >> 12) +
+	      ((data & 0x0003c0) >>  6);
 
     return (NULL);
 }
 
 void S9xStartCheatSearch (SCheatData *d)
 {
+    // memmove may be required: Source is usually a different malloc, but could be pointed to d->CWRAM [Neb]
     memmove (d->CWRAM, d->RAM, 0x20000);
+    // memmove may be required: Source is usually a different malloc, but could be pointed to d->CSRAM [Neb]
     memmove (d->CSRAM, d->SRAM, 0x10000);
+    // memmove may be required: Source is usually a different malloc, but could be pointed to d->CIRAM [Neb]
     memmove (d->CIRAM, &d->FillRAM [0x3000], 0x2000);
     memset ((char *) d->WRAM_BITS, 0xff, 0x20000 >> 3);
     memset ((char *) d->SRAM_BITS, 0xff, 0x10000 >> 3);
@@ -389,3 +439,4 @@ void S9xOutputCheatSearchResults (SCheatData *d)
 	    printf ("IRAM: %05x: %02x\n", i, d->FillRAM [i + 0x3000]);
     }
 }
+

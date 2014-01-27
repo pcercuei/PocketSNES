@@ -1,11 +1,9 @@
 
 #include <stdio.h>
 #include <dirent.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <sys/time.h>
 #include "sal.h"
-
-#include <SDL/SDL.h>
 
 #define PALETTE_BUFFER_LENGTH	256*2*4
 
@@ -57,6 +55,7 @@ static u32 sal_Input(int held)
 		CASE(DOWN, DOWN);
 		CASE(LEFT, LEFT);
 		CASE(RIGHT, RIGHT);
+		CASE(HOME, MENU);
 	}
 
 	mInputRepeat = inputHeld;
@@ -156,6 +155,11 @@ u32 sal_InputPoll()
 	return sal_Input(1);
 }
 
+const char* sal_DirectoryGetTemp(void)
+{
+	return "/tmp";
+}
+
 void sal_CpuSpeedSet(u32 mhz)
 {
 
@@ -222,7 +226,13 @@ u32 sal_VideoInit(u32 bpp, u32 color, u32 refreshRate)
 	mRefreshRate=refreshRate;
 
 	//Set up the screen
-	mScreen = SDL_SetVideoMode( SAL_SCREEN_WIDTH, SAL_SCREEN_HEIGHT, bpp, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	mScreen = SDL_SetVideoMode( SAL_SCREEN_WIDTH, SAL_SCREEN_HEIGHT, bpp, SDL_HWSURFACE |
+#ifdef SDL_TRIPLEBUF
+		SDL_TRIPLEBUF
+#else
+		SDL_DOUBLEBUF
+#endif
+		);
 
     	//If there was an error in setting up the screen
     	if( mScreen == NULL )
@@ -246,6 +256,20 @@ u32 sal_VideoInit(u32 bpp, u32 color, u32 refreshRate)
 	sal_VideoFlip(1);
    
 	return SAL_OK;
+}
+
+u32 sal_VideoGetPitch()
+{
+	return mScreen->pitch;
+}
+
+void sal_VideoBitmapDim(u16* img, u32 pixelCount)
+{
+	u32 i;
+	for (i = 0; i < pixelCount; i += 2)
+		*(u32 *) &img[i] = (*(u32 *) &img[i] & 0xF7DEF7DE) >> 1;
+	if (pixelCount & 1)
+		img[i - 1] = (img[i - 1] & 0xF7DE) >> 1;
 }
 
 void sal_VideoFlip(s32 vsync)

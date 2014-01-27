@@ -22,6 +22,7 @@ extern "C" {
 #define SAL_INPUT_INDEX_VOL_DOWN		0
 #define SAL_INPUT_INDEX_STICK_PUSH		0
 #define SAL_INPUT_INDEX_POWER			7
+#define SAL_INPUT_INDEX_MENU		1
 #else
 #define SAL_INPUT_INDEX_UP			0
 #define SAL_INPUT_INDEX_DOWN			1
@@ -38,6 +39,7 @@ extern "C" {
 #define SAL_INPUT_INDEX_VOL_UP			12
 #define SAL_INPUT_INDEX_VOL_DOWN		13
 #define SAL_INPUT_INDEX_STICK_PUSH		14
+#define SAL_INPUT_INDEX_MENU		15
 #endif
 
 #define SAL_INPUT_UP			(1<<SAL_INPUT_INDEX_UP)
@@ -55,6 +57,7 @@ extern "C" {
 #define SAL_INPUT_VOL_UP		(1<<SAL_INPUT_INDEX_VOL_UP)
 #define SAL_INPUT_VOL_DOWN		(1<<SAL_INPUT_INDEX_VOL_DOWN)
 #define SAL_INPUT_STICK_PUSH		(1<<SAL_INPUT_INDEX_STICK_PUSH)
+#define SAL_INPUT_MENU		(1<<SAL_INPUT_INDEX_MENU)
 
 #define SAL_SCREEN_WIDTH			320
 #define SAL_SCREEN_HEIGHT			240
@@ -67,7 +70,7 @@ extern "C" {
 #define SAL_DIR_SEP				"/"
 #define SAL_DIR_SEP_BAD				"\\"
 
-#define SAL_RGB(r,g,b) (u16)((r) << 11 | (g) << 6 | (b) << 1 )
+#define SAL_RGB(r,g,b) (u16)((r) << 11 | (g) << 6 | (b))
 #define SAL_RGB_PAL(r,g,b) SAL_RGB(r,g,b)
 
 #define SAL_SEEK_END	SEEK_END
@@ -76,10 +79,6 @@ extern "C" {
 #include "sal_common.h"
 
 u32 sal_InputWait();
-void sal_SubmitSamples(void);
-void *sal_GetCurrentAudioBuffer(void);
-u32 sal_AudioGetSampleCount();
-u32 sal_AudioGetBufferSize();
 
 #ifdef __cplusplus
 }

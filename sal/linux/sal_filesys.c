@@ -1,10 +1,11 @@
 
 #include <string.h>
-#include <error.h>
+//#include <error.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include "sal.h"
+
 
 s32 sal_DirectoryGetCurrent(s8 *path, u32 size)
 {
@@ -35,6 +36,8 @@ s32 sal_DirectoryGetItemCount(const char *path, s32 *returnItemCount)
 		}
 
 	}
+	else
+		return SAL_ERROR;
 
 	*returnItemCount=count;
 	return SAL_OK;
@@ -110,7 +113,8 @@ s32 sal_DirectoryGet(const char *path, struct SAL_DIRECTORY_ENTRY *dir,
 	s32 fileCount=0;
 	DIR *d;
 	struct dirent *de;
-	ulong entriesRead=0;
+	uint32_t entriesRead=0;
+	
 	char fullFilename[256];
 	s32 endIndex=startIndex+count;
 	long loc;

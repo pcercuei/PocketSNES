@@ -1,43 +1,92 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
+
 #include "snes9x.h"
 #include "ppu.h"
 #include "cpuexec.h"
@@ -46,7 +95,7 @@
 
 static void S9xSA1CharConv2 ();
 static void S9xSA1DMA ();
-static void S9xSA1ReadVariableLengthData (bool8_32 inc, bool8_32 no_shift);
+static void S9xSA1ReadVariableLengthData (bool8 inc, bool8 no_shift);
 
 void S9xSA1Init ()
 {
@@ -68,34 +117,35 @@ void S9xSA1Init ()
     SA1.arithmetic_op = 0;
     SA1.sum = 0;
     SA1.overflow = FALSE;
+	SA1.S9xOpcodes=NULL;
 }
 
 void S9xSA1Reset ()
 {
-    SA1Registers.PB = 0;
-    SA1Registers.PC = Memory.FillRAM [0x2203] |
+    SA1.Registers.PB = 0;
+    SA1.Registers.PC = Memory.FillRAM [0x2203] |
 		      (Memory.FillRAM [0x2204] << 8);
-    SA1Registers.D.W = 0;
-    SA1Registers.DB = 0;
-    SA1Registers.SH = 1;
-    SA1Registers.SL = 0xFF;
-    SA1Registers.XH = 0;
-    SA1Registers.YH = 0;
-    SA1Registers.P.W = 0;
+    SA1.Registers.D.W = 0;
+    SA1.Registers.DB = 0;
+    SA1.Registers.SH = 1;
+    SA1.Registers.SL = 0xFF;
+    SA1.Registers.XH = 0;
+    SA1.Registers.YH = 0;
+    SA1.Registers.P.W = 0;
 
-    SA1ICPU.ShiftedPB = 0;
-    SA1ICPU.ShiftedDB = 0;
+    SA1.ShiftedPB = 0;
+    SA1.ShiftedDB = 0;
     SA1SetFlags (MemoryFlag | IndexFlag | IRQ | Emulation);
     SA1ClearFlags (Decimal);
 
     SA1.WaitingForInterrupt = FALSE;
     SA1.PC = NULL;
     SA1.PCBase = NULL;
-    S9xSA1SetPCBase (SA1Registers.PC, &SA1);
-    SA1ICPU.S9xOpcodes = S9xSA1OpcodesM1X1;
+    S9xSA1SetPCBase (SA1.Registers.PC);
+    SA1.S9xOpcodes = S9xSA1OpcodesM1X1;
 
     S9xSA1UnpackStatus();
-    S9xSA1FixCycles (&SA1Registers, &SA1ICPU);
+    S9xSA1FixCycles ();
     SA1.Executing = TRUE;
     SA1.BWRAM = Memory.SRAM;
     Memory.FillRAM [0x2225] = 0;
@@ -131,12 +181,12 @@ void S9xSA1SetBWRAMMemMap (uint8 val)
 
 void S9xFixSA1AfterSnapshotLoad ()
 {
-    SA1ICPU.ShiftedPB = (uint32) SA1Registers.PB << 16;
-    SA1ICPU.ShiftedDB = (uint32) SA1Registers.DB << 16;
+    SA1.ShiftedPB = (uint32) SA1.Registers.PB << 16;
+    SA1.ShiftedDB = (uint32) SA1.Registers.DB << 16;
 
-    S9xSA1SetPCBase (SA1ICPU.ShiftedPB + SA1Registers.PC, &SA1);
+    S9xSA1SetPCBase (SA1.ShiftedPB + SA1.Registers.PC);
     S9xSA1UnpackStatus ();
-    S9xSA1FixCycles (&SA1Registers, &SA1ICPU);
+    S9xSA1FixCycles ();
     SA1.VirtualBitmapFormat = (Memory.FillRAM [0x223f] & 0x80) ? 2 : 4;
     Memory.BWRAM = Memory.SRAM + (Memory.FillRAM [0x2224] & 7) * 0x2000;
     S9xSA1SetBWRAMMemMap (Memory.FillRAM [0x2225]);
@@ -145,13 +195,13 @@ void S9xFixSA1AfterSnapshotLoad ()
     SA1.Executing = !SA1.Waiting;
 }
 
-uint8 FASTCALL S9xSA1GetByte (uint32 address, struct SCPUState * cpu)
+uint8 S9xSA1GetByte (uint32 address)
 {
-    uint8 *GetAddress = cpu->Map [(address >> MEMMAP_SHIFT) & MEMMAP_MASK];
+    uint8 *GetAddress = SA1.Map [(address >> MEMMAP_SHIFT) & MEMMAP_MASK];
     if (GetAddress >= (uint8 *) CMemory::MAP_LAST)
 	return (*(GetAddress + (address & 0xffff)));
 
-    switch ((uintptr_t) GetAddress)
+    switch ((intptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
 	return (S9xGetSA1 (address & 0xffff));
@@ -162,33 +212,33 @@ uint8 FASTCALL S9xSA1GetByte (uint32 address, struct SCPUState * cpu)
 	return (*(SA1.BWRAM + ((address & 0x7fff) - 0x6000)));
     case CMemory::MAP_BWRAM_BITMAP:
 	address -= 0x600000;
-	if (cpu->VirtualBitmapFormat == 2)
+	if (SA1.VirtualBitmapFormat == 2)
 	    return ((Memory.SRAM [(address >> 2) & 0xffff] >> ((address & 3) << 1)) & 3);
 	else
 	    return ((Memory.SRAM [(address >> 1) & 0xffff] >> ((address & 1) << 2)) & 15);
     case CMemory::MAP_BWRAM_BITMAP2:
 	address = (address & 0xffff) - 0x6000;
-	if (cpu->VirtualBitmapFormat == 2)
-	    return ((cpu->BWRAM [(address >> 2) & 0xffff] >> ((address & 3) << 1)) & 3);
+	if (SA1.VirtualBitmapFormat == 2)
+	    return ((SA1.BWRAM [(address >> 2) & 0xffff] >> ((address & 3) << 1)) & 3);
 	else
-	    return ((cpu->BWRAM [(address >> 1) & 0xffff] >> ((address & 1) << 2)) & 15);
+	    return ((SA1.BWRAM [(address >> 1) & 0xffff] >> ((address & 1) << 2)) & 15);
 
     case CMemory::MAP_DEBUG:
     default:
 #ifdef DEBUGGER
 //	printf ("R(B) %06x\n", address);
 #endif
-
-	return (0);
+        return OpenBus;
     }
 }
 
-uint16 FASTCALL S9xSA1GetWord (uint32 address, struct SCPUState * cpu)
+uint16 S9xSA1GetWord (uint32 address)
 {
-    return (S9xSA1GetByte (address, cpu) | (S9xSA1GetByte (address + 1, cpu) << 8));
+    OpenBus = S9xSA1GetByte (address);
+    return (OpenBus | (S9xSA1GetByte (address + 1) << 8));
 }
 
-void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
+void S9xSA1SetByte (uint8 byte, uint32 address)
 {
     uint8 *Setaddress = SA1.WriteMap [(address >> MEMMAP_SHIFT) & MEMMAP_MASK];
 
@@ -198,7 +248,7 @@ void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
 	return;
     }
 
-    switch ((uintptr_t) Setaddress)
+    switch ((intptr_t) Setaddress)
     {
     case CMemory::MAP_PPU:
 	S9xSetSA1 (byte, address & 0xffff);
@@ -208,11 +258,11 @@ void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
 	*(Memory.SRAM + (address & 0xffff)) = byte;
 	return;
     case CMemory::MAP_BWRAM:
-	*(cpu->BWRAM + ((address & 0x7fff) - 0x6000)) = byte;
+	*(SA1.BWRAM + ((address & 0x7fff) - 0x6000)) = byte;
 	return;
     case CMemory::MAP_BWRAM_BITMAP:
 	address -= 0x600000;
-	if (cpu->VirtualBitmapFormat == 2)
+	if (SA1.VirtualBitmapFormat == 2)
 	{
 	    uint8 *ptr = &Memory.SRAM [(address >> 2) & 0xffff];
 	    *ptr &= ~(3 << ((address & 3) << 1));
@@ -227,15 +277,15 @@ void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
 	break;
     case CMemory::MAP_BWRAM_BITMAP2:
 	address = (address & 0xffff) - 0x6000;
-	if (cpu->VirtualBitmapFormat == 2)
+	if (SA1.VirtualBitmapFormat == 2)
 	{
-	    uint8 *ptr = &cpu->BWRAM [(address >> 2) & 0xffff];
+	    uint8 *ptr = &SA1.BWRAM [(address >> 2) & 0xffff];
 	    *ptr &= ~(3 << ((address & 3) << 1));
 	    *ptr |= (byte & 3) << ((address & 3) << 1);
 	}
 	else
 	{
-	    uint8 *ptr = &cpu->BWRAM [(address >> 1) & 0xffff];
+	    uint8 *ptr = &SA1.BWRAM [(address >> 1) & 0xffff];
 	    *ptr &= ~(15 << ((address & 1) << 2));
 	    *ptr |= (byte & 15) << ((address & 1) << 2);
 	}
@@ -244,52 +294,52 @@ void FASTCALL S9xSA1SetByte (uint8 byte, uint32 address, struct SCPUState * cpu)
     }
 }
 
-void FASTCALL S9xSA1SetWord (uint16 Word, uint32 address, struct SCPUState * cpu)
+void S9xSA1SetWord (uint16 Word, uint32 address)
 {
-    S9xSA1SetByte ((uint8) Word, address, cpu);
-    S9xSA1SetByte ((uint8) (Word >> 8), address + 1, cpu);
+    S9xSA1SetByte ((uint8) Word, address);
+    S9xSA1SetByte ((uint8) (Word >> 8), address + 1);
 }
 
-void FASTCALL S9xSA1SetPCBase (uint32 address, struct SCPUState * cpu)
+void S9xSA1SetPCBase (uint32 address)
 {
-    uint8 *GetAddress = cpu->Map [(address >> MEMMAP_SHIFT) & MEMMAP_MASK];
+    uint8 *GetAddress = SA1.Map [(address >> MEMMAP_SHIFT) & MEMMAP_MASK];
     if (GetAddress >= (uint8 *) CMemory::MAP_LAST)
     {
-	cpu->PCBase = GetAddress;
-	cpu->PC = GetAddress + (address & 0xffff);
+	SA1.PCBase = GetAddress;
+	SA1.PC = GetAddress + (address & 0xffff);
 	return;
     }
 
-    switch ((uintptr_t) GetAddress)
+    switch ((intptr_t) GetAddress)
     {
     case CMemory::MAP_PPU:
-	cpu->PCBase = Memory.FillRAM - 0x2000;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = Memory.FillRAM - 0x2000;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
 	
     case CMemory::MAP_CPU:
-	cpu->PCBase = Memory.FillRAM - 0x4000;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = Memory.FillRAM - 0x4000;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
 	
     case CMemory::MAP_DSP:
-	cpu->PCBase = Memory.FillRAM - 0x6000;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = Memory.FillRAM - 0x6000;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
 	
     case CMemory::MAP_SA1RAM:
     case CMemory::MAP_LOROM_SRAM:
-	cpu->PCBase = Memory.SRAM;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = Memory.SRAM;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
 
     case CMemory::MAP_BWRAM:
-	cpu->PCBase = cpu->BWRAM - 0x6000;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = SA1.BWRAM - 0x6000;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
     case CMemory::MAP_HIROM_SRAM:
-	cpu->PCBase = Memory.SRAM - 0x6000;
-	cpu->PC = cpu->PCBase + (address & 0xffff);
+	SA1.PCBase = Memory.SRAM - 0x6000;
+	SA1.PC = SA1.PCBase + (address & 0xffff);
 	return;
 
     case CMemory::MAP_DEBUG:
@@ -299,8 +349,8 @@ void FASTCALL S9xSA1SetPCBase (uint32 address, struct SCPUState * cpu)
 	
     default:
     case CMemory::MAP_NONE:
-	cpu->PCBase = Memory.RAM;
-	cpu->PC = Memory.RAM + (address & 0xffff);
+	SA1.PCBase = Memory.RAM;
+	SA1.PC = Memory.RAM + (address & 0xffff);
 	return;
     }
 }
@@ -308,7 +358,7 @@ void FASTCALL S9xSA1SetPCBase (uint32 address, struct SCPUState * cpu)
 void S9xSA1ExecuteDuringSleep ()
 {
 #if 0
-    if (cpu->Executing)
+    if (SA1.Executing)
     {
 	while (CPU.Cycles < CPU.NextEvent)
 	{
@@ -407,7 +457,7 @@ void S9xSetSA1 (uint8 byte, uint32 address)
 	    {
 		SA1.Flags |= IRQ_PENDING_FLAG;
 		SA1.IRQActive |= SNES_IRQ_SOURCE;
-		SA1.Executing = !SA1.Waiting && SA1ICPU.S9xOpcodes;
+		SA1.Executing = !SA1.Waiting && SA1.S9xOpcodes;
 	    }
 	}
 	if (byte & 0x10)
@@ -692,7 +742,8 @@ void S9xSetSA1 (uint8 byte, uint32 address)
 	if ((Memory.FillRAM [0x2230] & 0xb0) == 0xa0)
 	{
 	    // Char conversion 2 DMA enabled
-	    memmove (&Memory.ROM [CMemory::MAX_ROM_SIZE - 0x10000] + SA1.in_char_dma * 16,
+	    // memmove converted: Same malloc but constant non-overlapping addresses [Neb]
+	    memcpy (&Memory.ROM [CMemory::MAX_ROM_SIZE - 0x10000] + SA1.in_char_dma * 16,
 		     &Memory.FillRAM [0x2240], 16);
 	    SA1.in_char_dma = (SA1.in_char_dma + 1) & 7;
 	    if ((SA1.in_char_dma & 3) == 0)
@@ -845,6 +896,7 @@ static void S9xSA1DMA ()
 	len &= 0x3ff;
 	d = &Memory.FillRAM [0x3000] + dst;
     }
+    // memmove required: Can overlap arbitrarily [Neb]
     memmove (d, s, len);
     Memory.FillRAM [0x2301] |= 0x20;
     
@@ -856,7 +908,7 @@ static void S9xSA1DMA ()
     }
 }
 
-void S9xSA1ReadVariableLengthData (bool8_32 inc, bool8_32 no_shift)
+void S9xSA1ReadVariableLengthData (bool8 inc, bool8 no_shift)
 {
     uint32 addr =  Memory.FillRAM [0x2259] |
 		  (Memory.FillRAM [0x225a] << 8) |
@@ -876,8 +928,8 @@ void S9xSA1ReadVariableLengthData (bool8_32 inc, bool8_32 no_shift)
 	addr += (s >> 4) << 1;
 	s &= 15;
     }
-    uint32 data = S9xSA1GetWord (addr, &SA1) |
-		  (S9xSA1GetWord (addr + 2, &SA1) << 16);
+    uint32 data = S9xSA1GetWord (addr) |
+		  (S9xSA1GetWord (addr + 2) << 16);
 
     data >>= s;
     Memory.FillRAM [0x230c] = (uint8) data;
@@ -890,3 +942,4 @@ void S9xSA1ReadVariableLengthData (bool8_32 inc, bool8_32 no_shift)
 	Memory.FillRAM [0x225b] = (uint8) (addr >> 16);
     }
 }
+

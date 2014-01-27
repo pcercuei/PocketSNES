@@ -31,7 +31,7 @@ static u32 mFont8x8[]= {
 0x3c0606,0x667c6060,0x7c6666,0x663c0000,0x3c067e,0xc3e0c38,0xc0c0c,0x667c0000,0x3e607c66,0x663e0606,0x666666,0x181c0018,0x3c1818,0x18180018,0xe181818,0x36660606,0x66361e,0x1818181c,0x3c1818,0x7f370000,0x63636b,0x663e0000,0x666666,0x663c0000,0x3c6666,0x663e0000,0x63e6666,0x667c0000,0x607c6666,0x663e0000,0x60606,0x67c0000,0x3e603c,0x187e1800,0x701818,0x66660000,0x7c6666,0x66660000,0x183c66,0x63630000,0x363e6b,0x3c660000,0x663c18,0x66660000,0x3e607c66,0x307e0000,0x7e0c18,0xc181870,0x701818,0x18181818,0x18181818,0x3018180e,0xe1818,0x794f0600,0x30};
 
 static s32 mAudioRateLookup[] = {
-	11025, 22050, 44100, 48000,
+	11025, 22050, 32000, 44100, 48000,
 };
 
 static s8 mLastError[256]={0};
@@ -61,7 +61,7 @@ void sal_VideoBitmapScale(int startx, int starty, int viswidth, int visheight, i
 
   do
   {
-    u16 *buffer_mem=&src[(y>>16)*320];
+    u16 *buffer_mem=&src[(y>>16)*viswidth];
     W=newwidth; x=startx<<16;
     do {
       *dst++=buffer_mem[x>>16];
@@ -664,6 +664,11 @@ const char * sal_DirectoryGetHome(void)
 	return home;
 }
 
+const char * sal_DirectoryGetUser(void)
+{
+	return getenv("HOME");
+}
+
 void sal_DirectorySplitFilename(const char *wholeFilename, s8* path, s8 *filename, s8 *ext)
 {
 	u32 len=(u32)strlen(wholeFilename);
@@ -801,6 +806,70 @@ s32 sal_ImageDraw(u16 *image, u32 width, u32 height, s32 x, s32 y)
 	return SAL_OK;
 }
 
+s32 sal_HighlightBar(s32 width, s32 height, s32 x, s32 y)
+{
+	u16 *fbStart = (u16*)sal_VideoGetBuffer();
+	u16 *blitStart = fbStart + (SAL_SCREEN_Y_STRIDE_DOWN * y) + (SAL_SCREEN_X_STRIDE_RIGHT * x);
+
+	//vertical stride
+	int v_stride = (SAL_SCREEN_Y_STRIDE_DOWN) - (width * SAL_SCREEN_X_STRIDE_RIGHT);
+
+	int percentage_stride = (1 << 16) / width;
+	int percentage = 0;
+	int percentage_inv = (1 << 16);
+
+	int percentage_r_err = 0;
+
+	int percentage_bg_r_err = 0;
+	int percentage_bg_g_err = 0;
+	int percentage_bg_b_err = 0;
+
+	int x2, y2;
+	for (y2=0; y2 < height; y2++)
+	{
+		for (x2=0; x2 < width; x2++)
+		{
+			int bg_col = *blitStart;
+			int r, g, b, bgr, bgg, bgb;
+
+			//extract background colours
+			bgr = bg_col >> 11;
+			bgg = (bg_col >> 6) & 0x1F;
+			bgb = bg_col & 0x1F;
+
+			//propagate the error
+			percentage_bg_r_err += (percentage * bgr) & 0xFFFF;
+			percentage_bg_g_err += (percentage * bgg) & 0xFFFF;
+			percentage_bg_b_err += (percentage * bgb) & 0xFFFF;
+			percentage_r_err += (percentage_inv * 31) & 0xFFFF;
+
+			//final colour blend, dont need to do the inverse of g/b because we're only blending red with the background!
+			r =  ((31 * percentage_inv) + (percentage_r_err & ~0xFFFF)) >> 16;
+			r += ((bgr * percentage) + (percentage_bg_r_err & ~0xFFFF)) >> 16;
+			g =  ((bgg * percentage) + (percentage_bg_g_err & ~0xFFFF)) >> 16;
+			b =  ((bgb * percentage) + (percentage_bg_b_err & ~0xFFFF)) >> 16;
+
+			*blitStart = SAL_RGB((r > 31) ? 31 : r, g, b);
+			blitStart += SAL_SCREEN_X_STRIDE_RIGHT;
+
+			percentage += percentage_stride;
+			percentage_inv -= percentage_stride;
+
+			//If the error is > 1 (in fix16.16), cut it down to size
+			percentage_r_err &= 0xFFFF;
+			percentage_bg_r_err &= 0xFFFF;
+			percentage_bg_g_err &= 0xFFFF;
+			percentage_bg_b_err &= 0xFFFF;
+		}
+
+		blitStart += v_stride;
+		percentage = 0;
+		percentage_inv = (1 << 16);
+	}
+
+	return SAL_OK;
+}
+
 s32 sal_ImageLoad(const char *fname, void *dest, u32 width, u32 height)
 {
 	FILE *fp;
@@ -859,7 +928,7 @@ s32 sal_ImageLoad(const char *fname, void *dest, u32 width, u32 height)
 
 	u32 h;
 	unsigned short *dst = dest;
-	if (info_ptr->pixel_depth != 24)
+	if (png_get_bit_depth(png_ptr, info_ptr) != 24)
 	{
 		sal_LastErrorSet("bg image not 24bpp");
 		png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : NULL, (png_infopp)NULL);
@@ -867,7 +936,7 @@ s32 sal_ImageLoad(const char *fname, void *dest, u32 width, u32 height)
 		return SAL_ERROR;
 	}
 	
-	if (height != info_ptr->height)
+	if (height != png_get_image_height(png_ptr, info_ptr))
 	{
 		sal_LastErrorSet("image height invalid");
 		png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : NULL, (png_infopp)NULL);
@@ -875,7 +944,7 @@ s32 sal_ImageLoad(const char *fname, void *dest, u32 width, u32 height)
 		return SAL_ERROR;
 	}
 	
-	if (width != info_ptr->width)
+	if (width != png_get_image_width(png_ptr, info_ptr))
 	{
 		sal_LastErrorSet("image width is invalid");
 		png_destroy_read_struct(&png_ptr, info_ptr ? &info_ptr : NULL, (png_infopp)NULL);
@@ -904,7 +973,7 @@ u32 sal_AudioRateNext(u32 currRate)
 {
 	s32 x;
 	u32 newRate;
-	for (x=0;x<sizeof(mAudioRateLookup);x++)
+	for (x=0;x<sizeof(mAudioRateLookup)/sizeof(mAudioRateLookup[0]);x++)
 	{
 		newRate=mAudioRateLookup[x];
 		if(newRate>currRate) break;
@@ -916,7 +985,7 @@ u32 sal_AudioRatePrevious(u32 currRate)
 {
 	s32 x;
 	u32 newRate;
-	for (x=sizeof(mAudioRateLookup)-1; x>=0; x--)
+	for (x=(sizeof(mAudioRateLookup)/sizeof(mAudioRateLookup[0]))-1; x>=0; x--)
 	{
 		newRate=mAudioRateLookup[x];
 		if(newRate<currRate) break;

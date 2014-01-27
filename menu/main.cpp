@@ -12,10 +12,14 @@
 #include "gfx.h"
 #include "soundux.h"
 #include "snapshot.h"
-#include "savestateio.h"
+#include "scaler.h"
 
 #define SNES_SCREEN_WIDTH  256
 #define SNES_SCREEN_HEIGHT 192
+
+#define FIXED_POINT 0x10000UL
+#define FIXED_POINT_REMAINDER 0xffffUL
+#define FIXED_POINT_SHIFT 16
 
 static struct MENU_OPTIONS mMenuOptions;
 static int mEmuScreenHeight;
@@ -34,11 +38,25 @@ static u32 mSaveRequested=0;
 static u32 mQuickStateTimer=0;
 static u32 mVolumeTimer=0;
 static u32 mVolumeDisplayTimer=0;
+static u32 mFramesCleared=0;
 static u32 mInMenu=0;
 
 static int S9xCompareSDD1IndexEntries (const void *p1, const void *p2)
 {
     return (*(uint32 *) p1 - *(uint32 *) p2);
+}
+
+bool JustifierOffscreen (void)
+{
+	return true;
+}
+
+void JustifierButtons (uint32&)
+{
+}
+
+void S9xProcessSound (unsigned int)
+{
 }
 
 extern "C"
@@ -48,10 +66,19 @@ void S9xExit ()
 {
 }
 
+u32 SamplesDoneThisFrame = 0;
+
 void S9xGenerateSound (void)
 {
-	S9xMessage (0,0,"generate sound");
-	return;
+	so.err_counter += so.err_rate;
+	if ((Settings.SoundSync >= 2 && so.err_counter >= FIXED_POINT)
+	 || (Settings.SoundSync == 1 && so.err_counter >= FIXED_POINT * 128))
+	{
+		u32 SamplesThisRun = so.err_counter >> FIXED_POINT_SHIFT;
+		so.err_counter &= FIXED_POINT_REMAINDER;
+		sal_AudioGenerate(SamplesThisRun);
+		SamplesDoneThisFrame += SamplesThisRun;
+	}
 }
 
 void S9xSetPalette ()
@@ -82,6 +109,11 @@ bool8 S9xOpenSnapshotFile (const char *fname, bool8 read_only, STREAM *file)
 
 	return (FALSE);	
 }
+
+const char* S9xGetSnapshotDirectory (void)
+{
+	return sal_DirectoryGetHome();
+}
 	
 void S9xCloseSnapshotFile (STREAM file)
 {
@@ -109,20 +141,47 @@ void S9xLoadSDD1Data (void)
 
 }
 
-   
+u16 IntermediateScreen[SNES_WIDTH * SNES_HEIGHT_EXTENDED];
 
 bool8_32 S9xInitUpdate ()
 {
-	if(mInMenu) return (TRUE);
-	if(mMenuOptions.fullScreen)	GFX.Screen = (uint8 *) sal_VideoGetBuffer();
-	else				GFX.Screen = (uint8 *) sal_VideoGetBuffer()+(320-SNES_WIDTH)+((240-SNES_HEIGHT)*320);
+	if (mInMenu) return TRUE;
 
-	return (TRUE);
+	GFX.Screen = (u8*) IntermediateScreen; /* replacement needed after loading the saved states menu */
+	return TRUE;
 }
 
 bool8_32 S9xDeinitUpdate (int Width, int Height, bool8_32)
 {
 	if(mInMenu) return TRUE;
+
+	// After returning from the menu, clear the background of 3 frames.
+	// This prevents remnants of the menu from appearing.
+	if (mFramesCleared < 3)
+	{
+		sal_VideoClear(0);
+		mFramesCleared++;
+	}
+
+	if (mMenuOptions.fullScreen == 1)
+	{
+		upscale_p((uint32_t*) sal_VideoGetBuffer(), (uint32_t*) IntermediateScreen, SNES_WIDTH);
+	}
+	if (mMenuOptions.fullScreen == 2)
+	{
+		upscale_256x224_to_320x240_bilinearish((uint32_t*) sal_VideoGetBuffer() + 160, (uint32_t*) IntermediateScreen, SNES_WIDTH);
+	}
+	if (mMenuOptions.fullScreen == 0)
+	{
+		u32 y, pitch = sal_VideoGetPitch();
+		u8 *src = (u8*) IntermediateScreen, *dst = (u8*) sal_VideoGetBuffer() + ((SAL_SCREEN_WIDTH - SNES_WIDTH) / 2 + (((SAL_SCREEN_HEIGHT - SNES_HEIGHT) / 2) * SAL_SCREEN_WIDTH)) * sizeof(u16);
+		for (y = 0; y < SNES_HEIGHT; y++)
+		{
+			memcpy(dst, src, SNES_WIDTH * sizeof(u16));
+			src += SNES_WIDTH * sizeof(u16);
+			dst += pitch;
+		}
+	}
 
 	u32 newTimer;
 	if (mMenuOptions.showFps) 
@@ -169,49 +228,6 @@ const char *S9xGetFilename (const char *ex)
 	return (dir);
 }
 
-static u8 *mTempState=NULL;
-static
-void LoadStateMem()
-{
-	SetSaveStateIoModeMemory(&mTempState);
-	S9xUnfreezeGame("blah");
-}
-
-static 
-void SaveStateMem()
-{
-	SetSaveStateIoModeMemory(&mTempState);
-
-	S9xFreezeGame("blah");
-}
-
-void HandleQuickStateRequests()
-{
-	if(mVolumeTimer>0) mVolumeTimer--;
-	if(mVolumeDisplayTimer>0) mVolumeDisplayTimer--;
-
-	if(mQuickStateTimer>0)
-	{
-		mQuickStateTimer--;
-		return;
-	}
-
-	if(mSaveRequested)
-	{
-		mSaveRequested=0;
-		SaveStateMem();
-		mQuickStateTimer = 60;
-	}
-
-	if(mLoadRequested)
-	{
-		mLoadRequested=0;
-		LoadStateMem();
-		mQuickStateTimer = 60;
-	}
-
-	
-}
 uint32 S9xReadJoypad (int which1)
 {
 	uint32 val=0x80000000;
@@ -220,30 +236,9 @@ uint32 S9xReadJoypad (int which1)
 
 	u32 joy = sal_InputPoll();
 	
-	if ((joy & SAL_INPUT_SELECT)&&(joy & SAL_INPUT_START))	
+	if (joy & SAL_INPUT_MENU)
 	{
 		mEnterMenu = 1;		
-		return val;
-	}
-
-	
-	if ((joy & SAL_INPUT_L)&&(joy & SAL_INPUT_R)&&(joy & SAL_INPUT_LEFT))
-	{
-		if (mQuickStateTimer==0)
-		{
-			mSaveRequested=1;
-			strcpy(mQuickStateDisplay,"Saved!");
-		}
-		return val;
-	}
-
-	if ((joy & SAL_INPUT_L)&&(joy & SAL_INPUT_R)&&(joy & SAL_INPUT_RIGHT))
-	{
-		if (mQuickStateTimer==0)
-		{
-			mLoadRequested=1;
-			strcpy(mQuickStateDisplay,"Loaded!");
-		}
 		return val;
 	}
 
@@ -331,26 +326,27 @@ const char *S9xBasename (const char *f)
       return (f);
 }
 
-
+void PSNESForceSaveSRAM (void)
+{
+	if(mRomName[0] != 0)
+	{
+		Memory.SaveSRAM ((s8*)S9xGetFilename (".srm"));
+	}
+}
 
 void S9xSaveSRAM (int showWarning)
 {
 	if (CPU.SRAMModified)
 	{
-		if(Memory.SaveSRAM ((s8*)S9xGetFilename (".srm")))
+		if(!Memory.SaveSRAM ((s8*)S9xGetFilename (".srm")))
 		{
-			sync();
-		}
-		else
-		{
-			MenuMessageBox("Saving SRAM...Failed","SRAM Not Saved!","",MENU_MESSAGE_BOX_MODE_PAUSE);
+			MenuMessageBox("Saving SRAM","Failed!","",MENU_MESSAGE_BOX_MODE_PAUSE);
 		}
 	}
 	else if(showWarning)
 	{
-		MenuMessageBox("Saving SRAM...Ignored!","No changes have been made to SRAM","So there is nothing to save!",MENU_MESSAGE_BOX_MODE_MSG);
+		MenuMessageBox("SRAM saving ignored","No changes have been made to SRAM","",MENU_MESSAGE_BOX_MODE_MSG);
 	}
-	sleep(1);
 }
 
 
@@ -364,10 +360,11 @@ bool8_32 S9xOpenSoundDevice(int a, unsigned char b, int c)
 
 void S9xAutoSaveSRAM (void)
 {
-	//since I can't sync the data, there is no point in even writing the data
-	//out at this point.  Instead I'm now saving the data as the users enter the menu.
-	//Memory.SaveSRAM (S9xGetFilename (".srm"));
-	//sync();  can't sync when emulator is running as it causes delays
+	if (mMenuOptions.autoSaveSram)
+	{
+		Memory.SaveSRAM (S9xGetFilename (".srm"));
+		// sync(); // Only sync at exit or with a ROM change
+	}
 }
 
 void S9xLoadSRAM (void)
@@ -375,11 +372,15 @@ void S9xLoadSRAM (void)
 	Memory.LoadSRAM ((s8*)S9xGetFilename (".srm"));
 }
 
+static u32 LastAudioRate = 0;
+static u32 LastStereo = 0;
+
 static
 int Run(int sound)
 {
   	int skip=0, done=0, doneLast=0,aim=0,i;
 	Settings.NextAPUEnabled = Settings.APUEnabled = sound;
+	Settings.SoundSync = mMenuOptions.soundSync;
 	sal_TimerInit(Settings.FrameTime);
 	done=sal_TimerRead()-1;
 
@@ -388,15 +389,26 @@ int Run(int sound)
 		Settings.SoundPlaybackRate = mMenuOptions.soundRate;
 		Settings.Stereo = mMenuOptions.stereo ? TRUE : FALSE;
 		*/
+#ifndef FOREVER_16_BIT_SOUND
 		Settings.SixteenBitSound=true;
+#endif
 
-		sal_AudioInit(mMenuOptions.soundRate, 16,
-					mMenuOptions.stereo, Memory.ROMFramesPerSecond);
+		if (LastAudioRate != mMenuOptions.soundRate || LastStereo != mMenuOptions.stereo)
+		{
+			if (LastAudioRate != 0)
+			{
+				sal_AudioClose();
+			}
+			sal_AudioInit(mMenuOptions.soundRate, 16,
+						mMenuOptions.stereo, Memory.ROMFramesPerSecond);
 
-		S9xInitSound (mMenuOptions.soundRate,
-					mMenuOptions.stereo, sal_AudioGetBufferSize());
-		S9xSetPlaybackRate(mMenuOptions.soundRate);
+			S9xInitSound (mMenuOptions.soundRate,
+						mMenuOptions.stereo, sal_AudioGetSamplesPerFrame() * sal_AudioGetBytesPerSample());
+			S9xSetPlaybackRate(mMenuOptions.soundRate);
+			LastAudioRate = mMenuOptions.soundRate;
+		}
 		S9xSetSoundMute (FALSE);
+		sal_AudioResume();
 
 	} else {
 		S9xSetSoundMute (TRUE);
@@ -418,22 +430,16 @@ int Run(int sound)
 				//Run SNES for one glorious frame
 				S9xMainLoop ();
 
-				if (sound) {
-					S9xMixSamples((uint8 *) sal_GetCurrentAudioBuffer(),
-								sal_AudioGetSampleCount());
-					sal_SubmitSamples();
-				}
-//				HandleQuickStateRequests();
+				sal_AudioGenerate(sal_AudioGetSamplesPerFrame() - SamplesDoneThisFrame);
 			}
 			if (done>=aim) break; // Up to date now
 			if (mEnterMenu) break;
 		}
 		done=aim; // Make sure up to date
-		HandleQuickStateRequests();
   	}
 
 	if (sound)
-		sal_AudioClose();
+		sal_AudioPause();
 
 	mEnterMenu=0;
 	return mEnterMenu;
@@ -458,15 +464,15 @@ int SnesRomLoad()
 	char text[256];
 	FILE *stream=NULL;
   
-    	MenuMessageBox("Loading Rom...",mRomName,"",MENU_MESSAGE_BOX_MODE_MSG);
+    	MenuMessageBox("Loading ROM...",mRomName,"",MENU_MESSAGE_BOX_MODE_MSG);
 
 	if (!Memory.LoadROM (mRomName))
 	{
-		MenuMessageBox("Loading Rom...",mRomName,"FAILED!!!!",MENU_MESSAGE_BOX_MODE_PAUSE);
+		MenuMessageBox("Loading ROM",mRomName,"Failed!",MENU_MESSAGE_BOX_MODE_PAUSE);
 		return SAL_ERROR;
 	}
 	
-	MenuMessageBox("Loading Rom...OK!",mRomName,"",MENU_MESSAGE_BOX_MODE_MSG);
+	MenuMessageBox("Done loading the ROM",mRomName,"",MENU_MESSAGE_BOX_MODE_MSG);
 
 	S9xReset();
 	S9xResetSound(1);
@@ -491,7 +497,7 @@ int SnesInit()
 	Settings.FrameTimePAL = 20000;
 	Settings.FrameTimeNTSC = 16667;
 	Settings.FrameTime = Settings.FrameTimeNTSC;
-	Settings.DisableSampleCaching = FALSE;
+	// Settings.DisableSampleCaching = FALSE;
 	Settings.DisableMasterVolume = TRUE;
 	Settings.Mouse = FALSE;
 	Settings.SuperScope = FALSE;
@@ -504,17 +510,20 @@ int SnesInit()
 	
 	Settings.ForceTransparency = FALSE;
 	Settings.Transparency = TRUE;
+#ifndef FOREVER_16_BIT
 	Settings.SixteenBit = TRUE;
+#endif
 	
 	Settings.SupportHiRes = FALSE;
 	Settings.NetPlay = FALSE;
 	Settings.ServerName [0] = 0;
-	Settings.AutoSaveDelay = 30;
+	Settings.AutoSaveDelay = 1;
 	Settings.ApplyCheats = TRUE;
 	Settings.TurboMode = FALSE;
 	Settings.TurboSkipFrames = 15;
 	Settings.ThreadSound = FALSE;
-	Settings.SoundSync = FALSE;
+	Settings.SoundSync = 1;
+	Settings.FixFrequency = TRUE;
 	//Settings.NoPatch = true;		
 
 	Settings.SuperFX = TRUE;
@@ -523,9 +532,8 @@ int SnesInit()
 	Settings.C4 = TRUE;
 	Settings.SDD1 = TRUE;
 
-	GFX.Pitch = 320 * 2;
-	GFX.RealPitch = 320 * 2;
-	GFX.Screen = (uint8 *) sal_VideoGetBuffer();
+	GFX.Screen = (uint8*) IntermediateScreen;
+	GFX.RealPitch = GFX.Pitch = 256 * sizeof(u16);
 	
 	GFX.SubScreen = (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
 	GFX.ZBuffer =  (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
@@ -538,8 +546,10 @@ int SnesInit()
 	if (Settings.ForceNoTransparency)
          Settings.Transparency = FALSE;
 
+#ifndef FOREVER_16_BIT
 	if (Settings.Transparency)
          Settings.SixteenBit = TRUE;
+#endif
 
 	Settings.HBlankStart = (256 * Settings.H_Max) / SNES_HCOUNTER_MAX;
 
@@ -655,11 +665,15 @@ int mainEntry(int argc, char* argv[])
 
 		if(event==EVENT_LOAD_ROM)
 		{
-			if(mTempState) free(mTempState);
-			mTempState=NULL;
+			if (mRomName[0] != 0)
+			{
+				MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
+				PSNESForceSaveSRAM();
+			}
 			if(SnesRomLoad() == SAL_ERROR) 
 			{
-				MenuMessageBox("Failed to load rom",mRomName,"Press any button to continue", MENU_MESSAGE_BOX_MODE_PAUSE);
+				mRomName[0] = 0;
+				MenuMessageBox("Failed to load ROM",mRomName,"Press any button to continue", MENU_MESSAGE_BOX_MODE_PAUSE);
 				sal_Reset();
 		    		return 0;
 			}
@@ -687,10 +701,7 @@ int mainEntry(int argc, char* argv[])
 
 			sal_AudioSetVolume(mMenuOptions.volume,mMenuOptions.volume);
 			sal_CpuSpeedSet(mMenuOptions.cpuSpeed);	
-			sal_VideoClear(0);
-			sal_VideoFlip(1);
-			sal_VideoClear(0);
-			sal_VideoFlip(1);
+			mFramesCleared = 0;
 			if(mMenuOptions.soundEnabled) 	
 				RunSound();
 			else	RunNoSound();
@@ -701,8 +712,8 @@ int mainEntry(int argc, char* argv[])
 		if(event==EVENT_EXIT_APP) break;	
 	}
 
-	if(mTempState) free(mTempState);
-	mTempState=NULL;
+	MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
+	PSNESForceSaveSRAM();
 	
 	S9xGraphicsDeinit();
 	S9xDeinitAPU();

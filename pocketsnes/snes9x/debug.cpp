@@ -1,44 +1,96 @@
-/*
- * Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- *
- * (c) Copyright 1996 - 2001 Gary Henderson (gary.henderson@ntlworld.com) and
- *                           Jerremy Koot (jkoot@snes9x.com)
- *
- * Super FX C emulator code 
- * (c) Copyright 1997 - 1999 Ivar (ivar@snes9x.com) and
- *                           Gary Henderson.
- * Super FX assembler emulator code (c) Copyright 1998 zsKnight and _Demo_.
- *
- * DSP1 emulator code (c) Copyright 1998 Ivar, _Demo_ and Gary Henderson.
- * C4 asm and some C emulation code (c) Copyright 2000 zsKnight and _Demo_.
- * C4 C code (c) Copyright 2001 Gary Henderson (gary.henderson@ntlworld.com).
- *
- * DOS port code contains the works of other authors. See headers in
- * individual files.
- *
- * Snes9x homepage: http://www.snes9x.com
- *
- * Permission to use, copy, modify and distribute Snes9x in both binary and
- * source form, for non-commercial purposes, is hereby granted without fee,
- * providing that this license information and copyright notice appear with
- * all copies and any derived work.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event shall the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Snes9x is freeware for PERSONAL USE only. Commercial users should
- * seek permission of the copyright holders first. Commercial use includes
- * charging money for Snes9x or software derived from Snes9x.
- *
- * The copyright holders request that bug fixes and improvements to the code
- * should be forwarded to them so everyone can benefit from the modifications
- * in future versions.
- *
- * Super NES and Super Nintendo Entertainment System are trademarks of
- * Nintendo Co., Limited and its subsidiary companies.
- */
+/*******************************************************************************
+  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+ 
+  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
+                            Jerremy Koot (jkoot@snes9x.com)
+
+  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
+
+  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
+                            funkyass (funkyass@spam.shaw.ca),
+                            Joel Yliluoma (http://iki.fi/bisqwit/)
+                            Kris Bleakley (codeviolation@hotmail.com),
+                            Matthew Kendora,
+                            Nach (n-a-c-h@users.sourceforge.net),
+                            Peter Bortas (peter@bortas.org) and
+                            zones (kasumitokoduck@yahoo.com)
+
+  C4 x86 assembler and some C emulation code
+  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
+                            _Demo_ (_demo_@zsnes.com), and Nach
+
+  C4 C++ code
+  (c) Copyright 2003 Brad Jorsch
+
+  DSP-1 emulator code
+  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
+                            John Weidman, neviksti (neviksti@hotmail.com),
+                            Kris Bleakley, Andreas Naive
+
+  DSP-2 emulator code
+  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
+                     Lord Nightmare (lord_nightmare@users.sourceforge.net
+
+  OBC1 emulator code
+  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
+                            Kris Bleakley
+  Ported from x86 assembler to C by sanmaiwashi
+
+  SPC7110 and RTC C++ emulator code
+  (c) Copyright 2002 Matthew Kendora with research by
+                     zsKnight, John Weidman, and Dark Force
+
+  S-DD1 C emulator code
+  (c) Copyright 2003 Brad Jorsch with research by
+                     Andreas Naive and John Weidman
+ 
+  S-RTC C emulator code
+  (c) Copyright 2001 John Weidman
+  
+  ST010 C++ emulator code
+  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
+
+  Super FX x86 assembler emulator code 
+  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
+
+  Super FX C emulator code 
+  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
+
+
+  SH assembler code partly based on x86 assembler code
+  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
+
+ 
+  Specific ports contains the works of other authors. See headers in
+  individual files.
+ 
+  Snes9x homepage: http://www.snes9x.com
+ 
+  Permission to use, copy, modify and distribute Snes9x in both binary and
+  source form, for non-commercial purposes, is hereby granted without fee,
+  providing that this license information and copyright notice appear with
+  all copies and any derived work.
+ 
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event shall the authors be held liable for any damages
+  arising from the use of this software.
+ 
+  Snes9x is freeware for PERSONAL USE only. Commercial users should
+  seek permission of the copyright holders first. Commercial use includes
+  charging money for Snes9x or software derived from Snes9x.
+ 
+  The copyright holders request that bug fixes and improvements to the code
+  should be forwarded to them so everyone can benefit from the modifications
+  in future versions.
+ 
+  Super NES and Super Nintendo Entertainment System are trademarks of
+  Nintendo Co., Limited and its subsidiary companies.
+*******************************************************************************/
+
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 #include "snes9x.h"
 #include "memmap.h"
@@ -51,6 +103,7 @@
 #include "display.h"
 #include "apu.h"
 #include "sa1.h"
+#include "spc7110.h"
 
 #ifdef DEBUGGER
 static void WhatsMissing ();
@@ -366,7 +419,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[0]);
 	Word = Operant[0];
 	Word += Registers.D.W;
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.DB, Word);
 	Size = 2;
 	break;
@@ -380,7 +433,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 	Word = Operant[0];
 	Word += Registers.D.W;
 	Word += Registers.X.W;
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.DB, Word);
 	Size = 2;
 	break;
@@ -393,7 +446,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[0]);
 	Word = Operant[0];
 	Word += Registers.D.W;
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	Word += Registers.Y.W;
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.DB, Word);
 	Size = 2;
@@ -408,7 +461,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 	Word = Operant[0];
 	Word += Registers.D.W;
 	Byte = S9xGetByte (Word + 2);
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Byte, Word);
 	Size = 2;
 	break;
@@ -422,7 +475,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 	Word = Operant[0];
 	Word += Registers.D.W;
 	Byte = S9xGetByte (Word + 2);
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	Word += Registers.Y.W;
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Byte, Word);
 	Size = 2;
@@ -520,7 +573,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[0]);
 	Word = Registers.S.W;
 	Word += Operant[0];
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	Word += Registers.Y.W;
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.DB, Word);
 	Size = 2;
@@ -535,7 +588,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[1],
 		     Operant[0]);
 	Word = (Operant[1] << 8) | Operant[0];
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.PB, Word);
 	Size = 3;
 	break;
@@ -550,7 +603,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[0]);
 	Word = (Operant[1] << 8) | Operant[0];
 	Byte = S9xGetByte (Word + 2);
-	Word = S9xGetWord (Word, cpu);
+	Word = S9xGetWord (Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Byte, Word);
 	Size = 3;
 	break;
@@ -565,7 +618,7 @@ uint8 S9xOPrint (char *Line, uint8 Bank, uint16 Address)
 		     Operant[0]);
 	Word = (Operant[1] << 8) | Operant[0];
 	Word += Registers.X.W;
-	Word = S9xGetWord (ICPU.ShiftedPB + Word, cpu);
+	Word = S9xGetWord (ICPU.ShiftedPB + Word);
 	sprintf (Line, "%-32s[$%02X:%04X]", Line, Registers.PB, Word);
 	Size = 3;
 	break;
@@ -1121,15 +1174,15 @@ void ProcessDebugCommand (char *Line)
 	printf ("Vectors:\n");
 	sprintf (String, "      8 Bit   16 Bit ");
 	DPrint (String);
-	sprintf (String, "ABT $00:%04X|$00:%04X", S9xGetWord (0xFFF8, cpu), S9xGetWord (0xFFE8, cpu));
+	sprintf (String, "ABT $00:%04X|$00:%04X", S9xGetWord (0xFFF8), S9xGetWord (0xFFE8));
 	DPrint (String);
-	sprintf (String, "BRK $00:%04X|$00:%04X", S9xGetWord (0xFFFE, cpu), S9xGetWord (0xFFE6, cpu));
+	sprintf (String, "BRK $00:%04X|$00:%04X", S9xGetWord (0xFFFE), S9xGetWord (0xFFE6));
 	DPrint (String);
-	sprintf (String, "COP $00:%04X|$00:%04X", S9xGetWord (0xFFF4, cpu), S9xGetWord (0xFFE4, cpu));
+	sprintf (String, "COP $00:%04X|$00:%04X", S9xGetWord (0xFFF4), S9xGetWord (0xFFE4));
 	DPrint (String);
-	sprintf (String, "IRQ $00:%04X|$00:%04X", S9xGetWord (0xFFFE, cpu), S9xGetWord (0xFFEE, cpu));
+	sprintf (String, "IRQ $00:%04X|$00:%04X", S9xGetWord (0xFFFE), S9xGetWord (0xFFEE));
 	DPrint (String);
-	sprintf (String, "NMI $00:%04X|$00:%04X", S9xGetWord (0xFFFA, cpu), S9xGetWord (0xFFEA, cpu));
+	sprintf (String, "NMI $00:%04X|$00:%04X", S9xGetWord (0xFFFA), S9xGetWord (0xFFEA));
 	DPrint (String);
 	sprintf (String, "RES     $00:%04X", S9xGetWord (0xFFFC));
 	DPrint (String);
@@ -1177,50 +1230,59 @@ void ProcessDebugCommand (char *Line)
     }
     if (*Line == 'S')
     {
-	int SmallSize, LargeSize;
+	int SmallWidth, LargeWidth;
+	int SmallHeight, LargeHeight;
 	switch ((Memory.FillRAM[0x2101] >> 5) & 7)
-	{
-	case 0:
-	    SmallSize = 1;
-	    LargeSize = 2;
-	    break;
-	case 1:
-	    SmallSize = 1;
-	    LargeSize = 4;
-	    break;
-	case 2:
-	    SmallSize = 1;
-	    LargeSize = 8;
-	    break;
-	case 3:
-	    SmallSize = 2;
-	    LargeSize = 4;
-	    break;
-	case 4:
-	    SmallSize = 2;
-	    LargeSize = 8;
-	    break;
-	case 5:
-	default:
-	    SmallSize = 4;
-	    LargeSize = 8;
-	    break;
-	}
-	printf ("Sprites: Small: %d, Large: %d, OAMAddr: 0x%04x, OBJNameBase: 0x%04x, OBJNameSelect: 0x%04x, First: %d\nVisible count - ",
-		SmallSize, LargeSize, PPU.OAMAddr, PPU.OBJNameBase,
-		PPU.OBJNameSelect, PPU.FirstSprite);
-	for (int p = 0; p < 4; p++)
-	{
-	    int c = 0;
-	    int i;
-	    for (i = 0; GFX.OBJList [i] >= 0; i++)
-	    {
-		if (PPU.OBJ[GFX.OBJList [i]].Priority == p)
-		    c++;
-	    }
-	    printf ("Priority %d: %03d, ", p, c);
-	}
-	printf ("\n");
+        {
+          case 0:
+            SmallWidth = SmallHeight = 8;
+            LargeWidth = LargeHeight = 16;
+            break;
+          case 1:
+            SmallWidth = SmallHeight = 8;
+            LargeWidth = LargeHeight = 32;
+            break;
+          case 2:
+            SmallWidth = SmallHeight = 8;
+            LargeWidth = LargeHeight = 64;
+            break;
+          case 3:
+            SmallWidth = SmallHeight = 16;
+            LargeWidth = LargeHeight = 32;
+            break;
+          case 4:
+            SmallWidth = SmallHeight = 16;
+            LargeWidth = LargeHeight = 64;
+            break;
+          default:
+          case 5:
+            SmallWidth = SmallHeight = 32;
+            LargeWidth = LargeHeight = 64;
+            break;
+          case 6:
+            SmallWidth = 16; SmallHeight = 32;
+            LargeWidth = 32; LargeHeight = 64;
+            break;
+          case 7:
+            SmallWidth = 16; SmallHeight = 32;
+            LargeWidth = LargeHeight = 32;
+            break;
+        }
+	printf ("Sprites: Small: %dx%d, Large: %dx%d, OAMAddr: 0x%04x, OBJNameBase: 0x%04x, OBJNameSelect: 0x%04x, First: %d\n",
+                SmallWidth,SmallHeight, LargeWidth,LargeHeight, PPU.OAMAddr,
+                PPU.OBJNameBase, PPU.OBJNameSelect, PPU.FirstSprite);
+//	for (int p = 0; p < 4; p++)
+//	{
+//	    int c = 0;
+//	    int i;
+//	    for (i = 0; GFX.OBJList [i] >= 0; i++)
+//	    {
+//		if (PPU.OBJ[GFX.OBJList [i]].Priority == p)
+//		    c++;
+//	    }
+//	    printf ("Priority %d: %03d, ", p, c);
+//	}
+//	printf ("\n");
 	for (int i = 0; i < 128; i++)
 	{
 	    printf ("X:%3d Y:%3d %c%c%d%c ",
@@ -1272,6 +1334,7 @@ void ProcessDebugCommand (char *Line)
     if (*Line == 'A')
     {
 	APU.Flags ^= TRACE_FLAG;
+
 	extern FILE *apu_trace;
 	if (APU.Flags & TRACE_FLAG)
 	{
@@ -1293,7 +1356,7 @@ void ProcessDebugCommand (char *Line)
 		apu_trace = NULL;
 	    }
 	}
-		
+
 	printf ("APU tracing %s\n", APU.Flags & TRACE_FLAG ? "enabled" :
 		"disabled");
     }
@@ -1302,8 +1365,10 @@ void ProcessDebugCommand (char *Line)
 	Settings.TraceSoundDSP ^= 1;
 	printf ("Sound DSP register tracing %s\n", Settings.TraceSoundDSP ?
 						   "enabled" : "disabled");
+
 	S9xOpenCloseSoundTracingFile (Settings.TraceSoundDSP);
     }
+
     if (*Line == 'b')
 	S9xPrintAPUState ();
 
@@ -2090,6 +2155,8 @@ void S9xDoDebug ()
 
 void S9xTrace ()
 {
+	if(!trace)
+		trace=fopen("trace.log", "a");
     char String [512];
     S9xOPrint (String, Registers.PB, CPU.PC - CPU.PCBase);
     fprintf (trace, "%s\n", String);
@@ -2105,11 +2172,14 @@ void S9xSA1Trace ()
 
 void S9xTraceMessage (const char *s)
 {
-    if (trace)
-	fprintf (trace, "%s\n", s);
-    else
-    if (trace2)
-	fprintf (trace2, "%s\n", s);
+	if(s)
+	{
+	    if (trace)
+		fprintf (trace, "%s\n", s);
+		else
+		if (trace2)
+		fprintf (trace2, "%s\n", s);
+	}
 }
 
 extern "C" void TraceSA1 ()
@@ -2147,3 +2217,4 @@ extern "C" void Trace ()
 }
 
 #endif
+
