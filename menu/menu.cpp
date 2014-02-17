@@ -109,6 +109,40 @@ s32 DeleteMenuOptions(const char *path, const char *filename,
 	return SAL_OK;
 }
 
+s32 LoadLastSelectedRomPos() // Try to get the last selected rom position from a config file
+{
+	char lastselfile[SAL_MAX_PATH];
+	s32 savedval = ROM_SELECTOR_DEFAULT_FOCUS;
+	strcpy(lastselfile, sal_DirectoryGetHome());
+	sal_DirectoryCombine(lastselfile, "lastselected.opt");
+	FILE * pFile;
+	pFile = fopen (lastselfile,"r+");
+	if (pFile != NULL) {
+		fscanf (pFile, "%i", &savedval);
+		fclose (pFile);
+	}
+	return savedval;
+}
+
+void SaveLastSelectedRomPos(s32 pospointer) // Save the last selected rom position in a config file
+{
+	char lastselfile[SAL_MAX_PATH];
+	strcpy(lastselfile, sal_DirectoryGetHome());
+	sal_DirectoryCombine(lastselfile, "lastselected.opt");
+	FILE * pFile;
+	pFile = fopen (lastselfile,"w+");
+	fprintf (pFile, "%i", pospointer);
+	fclose (pFile);
+}
+
+void DelLastSelectedRomPos() // Remove the last selected rom position config file
+{
+	char lastselfile[SAL_MAX_PATH];
+	strcpy(lastselfile, sal_DirectoryGetHome());
+	sal_DirectoryCombine(lastselfile, "lastselected.opt");
+	remove (lastselfile);
+}
+
 void MenuPause()
 {
 	sal_InputWaitForPress();
@@ -421,6 +455,8 @@ s32 FileSelect()
 	s32 size=0, check=SAL_OK;
 	
 	FileScan();
+	
+	focus = LoadLastSelectedRomPos(); //try to load a saved position in the romlist
 
 	smooth=focus<<8;
 	sal_InputIgnore();
@@ -484,6 +520,7 @@ s32 FileSelect()
 			switch(focus)
 			{
 				case ROM_SELECTOR_SAVE_DEFAULT_DIR: //Save default directory
+					DelLastSelectedRomPos(); //delete any previously saved position in the romlist
 					SaveMenuOptions(mSystemDir, DEFAULT_ROM_DIR_FILENAME, DEFAULT_ROM_DIR_EXT, mRomDir, strlen(mRomDir), 1);
 					break;
 
@@ -532,6 +569,7 @@ s32 FileSelect()
 					else
 					{
 						// user has selected a rom, so load it
+						SaveLastSelectedRomPos(focus); // save the current position in the romlist
 						strcpy(mRomName, mRomDir);
 						sal_DirectoryCombine(mRomName,mRomList[focus].filename);
 						mQuickSavePresent=0;  // reset any quick saves
@@ -969,14 +1007,15 @@ s32 SaveStateMenu(void)
 
 void ShowCredits()
 {
-	s32 menuExit=0,menuCount=5,menufocus=0,menuSmooth=0;
+	s32 menuExit=0,menuCount=6,menufocus=0,menuSmooth=0;
 	u32 keys=0;
 
 	strcpy(mMenuText[0],"PocketSNES - built " __DATE__);
 	strcpy(mMenuText[1],"-------------------------------------");
-	strcpy(mMenuText[2],"PocketSNES created by Scott Ramsby");
-	strcpy(mMenuText[3],"Initial port to the Dingoo by Reesy");
-	strcpy(mMenuText[4],"Ported to OpenDingux by pcercuei");
+	strcpy(mMenuText[2],"Based on Snes9x version " VERSION /* snes9x.h */);
+	strcpy(mMenuText[3],"PocketSNES created by Scott Ramsby");
+	strcpy(mMenuText[4],"Initial port to the Dingoo by Reesy");
+	strcpy(mMenuText[5],"Ported to OpenDingux by pcercuei");
 
 	sal_InputIgnore();
 	while (!menuExit)
@@ -1090,19 +1129,20 @@ void MainMenuUpdateText(s32 menu_index)
 						mMenuOptions->showFps ? "ON" : "OFF");
 			break;
 
-#if 0
 		case MENU_FULLSCREEN:
 			switch(mMenuOptions->fullScreen)
 			{
 				case 0:
-					strcpy(mMenuText[MENU_FULLSCREEN],"Full Screen Mode:           OFF");
+					strcpy(mMenuText[MENU_FULLSCREEN],"Full screen:                OFF");
 					break;
 				case 1:
-					strcpy(mMenuText[MENU_FULLSCREEN],"Full Screen Mode:           ON");
+					strcpy(mMenuText[MENU_FULLSCREEN],"Full screen:                FAST");
+					break;  
+				case 2:
+					strcpy(mMenuText[MENU_FULLSCREEN],"Full screen:                SMOOTH");
 					break;  
 			}
 			break;
-#endif
 			
 		case MENU_LOAD_GLOBAL_SETTINGS:
 			strcpy(mMenuText[MENU_LOAD_GLOBAL_SETTINGS],"Load Global Settings");
@@ -1149,7 +1189,7 @@ void MainMenuUpdateTextAll(void)
 //	MainMenuUpdateText(MENU_SOUND_VOL);
 	MainMenuUpdateText(MENU_FRAMESKIP);
 	MainMenuUpdateText(MENU_FPS);
-//	MainMenuUpdateText(MENU_FULLSCREEN);
+	MainMenuUpdateText(MENU_FULLSCREEN);
 	MainMenuUpdateText(MENU_LOAD_GLOBAL_SETTINGS);
 	MainMenuUpdateText(MENU_SAVE_GLOBAL_SETTINGS);
 	MainMenuUpdateText(MENU_LOAD_CURRENT_SETTINGS);
@@ -1376,12 +1416,20 @@ s32 MenuRun(s8 *romName)
 					MainMenuUpdateText(MENU_FPS);
 					break;
 
-#if 0
 				case MENU_FULLSCREEN:
-					mMenuOptions->fullScreen^=1;
+					if (keys & SAL_INPUT_RIGHT)
+					{
+						mMenuOptions->fullScreen = (mMenuOptions->fullScreen + 1) % 3;
+					}
+					else
+					{
+						if (mMenuOptions->fullScreen == 0)
+							mMenuOptions->fullScreen = 2;
+						else
+							mMenuOptions->fullScreen--;
+					}
 					MainMenuUpdateText(MENU_FULLSCREEN);
 					break;
-#endif
 			}
 		}
 

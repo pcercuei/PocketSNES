@@ -13,6 +13,7 @@
 #include "soundux.h"
 #include "snapshot.h"
 #include "savestateio.h"
+#include "scaler.h"
 
 #define SNES_SCREEN_WIDTH  256
 #define SNES_SCREEN_HEIGHT 192
@@ -34,6 +35,7 @@ static u32 mSaveRequested=0;
 static u32 mQuickStateTimer=0;
 static u32 mVolumeTimer=0;
 static u32 mVolumeDisplayTimer=0;
+static u32 mFramesCleared=0;
 static u32 mInMenu=0;
 
 static int S9xCompareSDD1IndexEntries (const void *p1, const void *p2)
@@ -109,20 +111,66 @@ void S9xLoadSDD1Data (void)
 
 }
 
-   
+u16 IntermediateScreen[SNES_WIDTH * SNES_HEIGHT_EXTENDED]; 
 
 bool8_32 S9xInitUpdate ()
 {
 	if(mInMenu) return (TRUE);
-	if(mMenuOptions.fullScreen)	GFX.Screen = (uint8 *) sal_VideoGetBuffer();
-	else				GFX.Screen = (uint8 *) sal_VideoGetBuffer()+(320-SNES_WIDTH)+((240-SNES_HEIGHT)*320);
-
+	
+	// After returning from the menu, clear the background of 3 frames.
+	// This prevents remnants of the menu from appearing.
+	if (mFramesCleared < 3)
+	{
+		sal_VideoClear(0);
+		mFramesCleared++;
+	}
+	
+	GFX.Screen = (u8*) IntermediateScreen;
 	return (TRUE);
 }
 
 bool8_32 S9xDeinitUpdate (int Width, int Height, bool8_32)
 {
 	if(mInMenu) return TRUE;
+	
+	if (mMenuOptions.fullScreen == 1)
+	{
+		if (Memory.FillRAM[0x2133] & 4) {
+			upscale_256x240_to_320x240((uint32_t*) sal_VideoGetBuffer(), (uint32_t*) IntermediateScreen, SNES_WIDTH);
+		} else {
+			upscale_p((uint32_t*) sal_VideoGetBuffer(), (uint32_t*) IntermediateScreen, SNES_WIDTH);
+		}
+	}
+	if (mMenuOptions.fullScreen == 2)
+	{
+		if (Memory.FillRAM[0x2133] & 4) {
+			upscale_256x240_to_320x240_bilinearish((uint32_t*) sal_VideoGetBuffer() + 160, (uint32_t*) IntermediateScreen, SNES_WIDTH);
+		} else {
+			upscale_256x224_to_320x240_bilinearish((uint32_t*) sal_VideoGetBuffer() + 160, (uint32_t*) IntermediateScreen, SNES_WIDTH);
+		}
+	}
+	if (mMenuOptions.fullScreen == 0)
+	{
+		if (Memory.FillRAM[0x2133] & 4) {
+			u32 y, pitch = sal_VideoGetPitch();
+			u8 *src = (u8*) IntermediateScreen, *dst = (u8*) sal_VideoGetBuffer() + ((SAL_SCREEN_WIDTH - SNES_WIDTH) / 2 + (((SAL_SCREEN_HEIGHT - SNES_HEIGHT_EXTENDED) / 2) * SAL_SCREEN_WIDTH)) * sizeof(u16);
+			for (y = 0; y < SNES_HEIGHT_EXTENDED; y++)
+			{
+				memcpy(dst, src, SNES_WIDTH * sizeof(u16));
+				src += SNES_WIDTH * sizeof(u16);
+				dst += pitch;
+			}
+		} else {
+			u32 y, pitch = sal_VideoGetPitch();
+			u8 *src = (u8*) IntermediateScreen, *dst = (u8*) sal_VideoGetBuffer() + ((SAL_SCREEN_WIDTH - SNES_WIDTH) / 2 + (((SAL_SCREEN_HEIGHT - SNES_HEIGHT) / 2) * SAL_SCREEN_WIDTH)) * sizeof(u16);
+			for (y = 0; y < SNES_HEIGHT; y++)
+			{
+				memcpy(dst, src, SNES_WIDTH * sizeof(u16));
+				src += SNES_WIDTH * sizeof(u16);
+				dst += pitch;
+			}
+		}
+	}
 
 	u32 newTimer;
 	if (mMenuOptions.showFps) 
@@ -220,7 +268,7 @@ uint32 S9xReadJoypad (int which1)
 
 	u32 joy = sal_InputPoll();
 	
-	if ((joy & SAL_INPUT_SELECT)&&(joy & SAL_INPUT_START))	
+	if (joy & SAL_INPUT_MENU)
 	{
 		mEnterMenu = 1;		
 		return val;
@@ -523,9 +571,8 @@ int SnesInit()
 	Settings.C4 = TRUE;
 	Settings.SDD1 = TRUE;
 
-	GFX.Pitch = 320 * 2;
-	GFX.RealPitch = 320 * 2;
-	GFX.Screen = (uint8 *) sal_VideoGetBuffer();
+	GFX.Screen = (uint8*) IntermediateScreen;
+	GFX.RealPitch = GFX.Pitch = 256 * sizeof(u16);
 	
 	GFX.SubScreen = (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
 	GFX.ZBuffer =  (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
@@ -687,10 +734,7 @@ int mainEntry(int argc, char* argv[])
 
 			sal_AudioSetVolume(mMenuOptions.volume,mMenuOptions.volume);
 			sal_CpuSpeedSet(mMenuOptions.cpuSpeed);	
-			sal_VideoClear(0);
-			sal_VideoFlip(1);
-			sal_VideoClear(0);
-			sal_VideoFlip(1);
+			mFramesCleared = 0;
 			if(mMenuOptions.soundEnabled) 	
 				RunSound();
 			else	RunNoSound();
